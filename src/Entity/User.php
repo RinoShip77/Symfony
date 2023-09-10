@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,11 +20,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
+    #[ORM\Column(name: 'registrationDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $registrationDate = null;
+
     #[ORM\Column(name: 'firstName', length: 50, nullable: true)]
     private ?string $firstName = null;
 
     #[ORM\Column(name: 'lastName', length: 50, nullable: true)]
     private ?string $lastName = null;
+
+    #[ORM\Column(name: 'profilePicture', length: 255, nullable: true)]
+    private ?string $profilePicture = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $address = null;
@@ -70,6 +77,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
+    public function getRegistrationDate(): ?\DateTimeInterface
+    {
+        return $this->registrationDate;
+    }
+
+    public function setRegistrationDate(\DateTimeInterface $registrationDate): static
+    {
+        $this->registrationDate = $registrationDate;
+
+        return $this;
+    }
+
     public function getFirstName(): ?string
     {
         return $this->firstName;
@@ -90,6 +109,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getProfilePicture(): ?string
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?string $profilePicture): static
+    {
+        $this->profilePicture = $profilePicture;
 
         return $this;
     }

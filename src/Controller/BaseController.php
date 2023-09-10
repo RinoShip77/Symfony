@@ -29,9 +29,11 @@ class BaseController extends AbstractController
 			{
 				$newUser['idUser'] = $user[0]['idUser'];
 				$newUser['email'] = $user[0]['email'];
+				$newUser['registrationDate'] = $user[0]['registrationDate'];
 				$newUser['firstName'] = $user[0]['firstName'];
 				$newUser['lastName'] = $user[0]['lastName'];
 				$newUser['address'] = $user[0]['address'];
+				$newUser['profilePicture'] = $user[0]['profilePicture'];
 				$newUser['phoneNumber'] = $user[0]['phoneNumber'];
 				$newUser['postalCode'] = $user[0]['postalCode'];
 				$newUser['roles'] = $user[0]['roles'];
