@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 10, 2023 at 09:43 PM
+-- Generation Time: Sep 11, 2023 at 05:45 PM
 -- Server version: 8.1.0
 -- PHP Version: 8.2.9
 
@@ -58,15 +58,15 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `idUser` int NOT NULL AUTO_INCREMENT,
   `email` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `registrationDate` datetime NOT NULL,
   `firstName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `lastName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `profilePicture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `address` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `phoneNumber` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `postalCode` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `roles` json DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `registrationDate` datetime NOT NULL,
+  `profilePicture` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`idUser`),
   UNIQUE KEY `UNIQ_1483A5E9E7927C74` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`idUser`, `email`, `registrationDate`, `firstName`, `lastName`, `profilePicture`, `address`, `phoneNumber`, `postalCode`, `roles`, `password`) VALUES
-(1, 'user@electrolib.com', '2023-09-10 16:50:46', 'Olivier', 'Bourgault', 'assets\\images\\contact-book.png', '123 rue Allo', '1234567890', 'K2W0A9', '[\"ROLES_USER\"]', '1234');
+INSERT INTO `users` (`idUser`, `email`, `firstName`, `lastName`, `address`, `phoneNumber`, `postalCode`, `roles`, `password`, `registrationDate`, `profilePicture`) VALUES
+(1, 'user@electrolib.com', 'Olivier', 'Bourgault', '123 rue Allo', '1234567890', 'K2W0A9', '[\"ROLES_USER\"]', '1234', '2023-09-09 12:46:35', 'assets\\images\\contact-book.png');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
