@@ -23,7 +23,7 @@ class BookController extends AbstractController
         $query = "SELECT * FROM books";
 
         if ($idGenre && $search) {
-            $query .= " WHERE idGenre IN($idGenre) AND title LIKE '%$search%'";
+            $query .= " WHERE title LIKE '%$search%' AND idGenre IN($idGenre)";
         }
 
         if($idGenre && !$search) {
