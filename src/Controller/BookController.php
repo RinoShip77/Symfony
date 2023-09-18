@@ -19,17 +19,22 @@ class BookController extends AbstractController
     public function getAll(Request $request, Connection $connexion): JsonResponse
     {
         $idGenre = $request->query->get('idGenre');
-        //$search = $request->query->get('search');
+        $search = $request->query->get('search');
+        $query = "SELECT * FROM books";
 
-        if ($idGenre) {
-            $books = $connexion->fetchAllAssociative("SELECT * FROM books WHERE idGenre IN($idGenre)");
-        } else {
-            $books = $connexion->fetchAllAssociative("SELECT * FROM books");
+        if ($idGenre && $search) {
+            $query .= " WHERE idGenre IN($idGenre) AND title LIKE '%$search%'";
         }
 
-        // if($search) {
-        //     $books = $connexion->fetchAllAssociative("SELECT * FROM books WHERE title LIKE '%$search%'");
-        // }
+        if($idGenre && !$search) {
+            $query .= " WHERE idGenre IN($idGenre)";
+        }
+        
+        if(!$idGenre && $search) {
+            $query .= " WHERE title LIKE '%$search%'";
+        }
+
+        $books = $connexion->fetchAllAssociative($query);
 
         return $this->json($books);
     }
