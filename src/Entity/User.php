@@ -2,16 +2,13 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -19,8 +16,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'idUser')]
     private ?int $idUser = null;
 
-    #[ORM\Column(length: 180, unique: true)]
+    #[ORM\Column(name: 'memberNumber', length: 180, unique: true)]
+    private ?string $memberNumber = null;
+    
+    #[ORM\Column(length: 180, nullable: true)]
     private ?string $email = null;
+    
+    #[ORM\Column(name: 'registrationDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $registrationDate = null;
+    
+    #[ORM\Column(name: 'firstName', length: 50, nullable: true)]
+    private ?string $firstName = null;
+    
+    #[ORM\Column(name: 'lastName', length: 50, nullable: true)]
+    private ?string $lastName = null;
+    
+    #[ORM\Column(name: 'profilePicture', length: 255, nullable: true)]
+    private ?string $profilePicture = null;
+    
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $address = null;
+    
+    #[ORM\Column(name: 'phoneNumber', length: 12, nullable: true)]
+    private ?string $phoneNumber = null;
+    
+    #[ORM\Column(name: 'postalCode', length: 7, nullable: true)]
+    private ?string $postalCode = null;
+    
+    #[ORM\Column]
+    private array $roles = [];
 
     /**
      * @var string The hashed password
@@ -28,33 +52,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(name: 'registrationDate', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $registrationDate = null;
-
-    #[ORM\Column(name: 'firstName', length: 50, nullable: true)]
-    private ?string $firstName = null;
-
-    #[ORM\Column(name: 'lastName', length: 50, nullable: true)]
-    private ?string $lastName = null;
-
-    #[ORM\Column(name: 'profilePicture', length: 255, nullable: true)]
-    private ?string $profilePicture = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $address = null;
-
-    #[ORM\Column(name: 'phoneNumber', length: 12, nullable: true)]
-    private ?string $phoneNumber = null;
-
-    #[ORM\Column(name: 'postalCode', length: 7, nullable: true)]
-    private ?string $postalCode = null;
-
-    #[ORM\Column(nullable: true)]
-    private array $roles = [];
 
     public function getIdUser(): ?int
     {
         return $this->idUser;
+    }
+
+    public function getMemberNumber(): ?string
+    {
+        return $this->memberNumber;
+    }
+
+    public function setMemberNumber(string $memberNumber): static
+    {
+        $this->memberNumber = $memberNumber;
+
+        return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->memberNumber;
     }
 
     public function getEmail(): ?string
@@ -62,24 +85,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(?string $email): static
     {
         $this->email = $email;
-
-        return $this;
-    }
-
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
 
         return $this;
     }
@@ -101,7 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): static
+    public function setFirstName(?string $firstName): static
     {
         $this->firstName = $firstName;
 
@@ -113,7 +121,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->lastName;
     }
 
-    public function setLastName(string $lastName): static
+    public function setLastName(?string $lastName): static
     {
         $this->lastName = $lastName;
 
@@ -137,7 +145,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->address;
     }
 
-    public function setAddress(string $address): static
+    public function setAddress(?string $address): static
     {
         $this->address = $address;
 
@@ -149,7 +157,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(string $phoneNumber): static
+    public function setPhoneNumber(?string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
 
@@ -161,7 +169,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->postalCode;
     }
 
-    public function setPostalCode(string $postalCode): static
+    public function setPostalCode(?string $postalCode): static
     {
         $this->postalCode = $postalCode;
 
@@ -188,13 +196,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
+     * @see PasswordAuthenticatedUserInterface
      */
-    public function getUserIdentifier(): string
+    public function getPassword(): string
     {
-        return (string) $this->email;
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     /**

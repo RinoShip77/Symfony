@@ -14,10 +14,10 @@ class Author
     #[ORM\Column(name: 'idAuthor')]
     private ?int $idAuthor = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(name: 'firstName', length: 50)]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(name: 'lastName', length: 50)]
     private ?string $lastName = null;
 
     public function getIdAuthor(): ?int
