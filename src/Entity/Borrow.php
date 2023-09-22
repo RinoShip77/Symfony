@@ -15,11 +15,13 @@ class Borrow
     #[ORM\Column(name: 'idBorrow')]
     private ?int $idBorrow = null;
 
-    #[ORM\Column(name: 'idUser')]
-    private ?int $idUser = null;
+    #[ORM\ManyToOne(inversedBy: 'borrows')]
+    #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
+    private ?User $user = null;
 
-    #[ORM\Column(name: 'idBook')]
-    private ?int $idBook = null;
+    #[ORM\OneToOne(inversedBy: 'borrow', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'idBook', referencedColumnName: 'idBook', nullable: false)]
+    private ?Book $book = null;
 
     #[ORM\Column(name: 'borrowedDate', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $borrowedDate = null;
@@ -35,26 +37,26 @@ class Borrow
         return $this->idBorrow;
     }
 
-    public function getIdUser(): ?int
+    public function getUser(): ?User
     {
-        return $this->idUser;
+        return $this->user;
     }
 
-    public function setIdUser(int $idUser): static
+    public function setUser(?User $user): static
     {
-        $this->idUser = $idUser;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getIdBook(): ?int
+    public function getBook(): ?Book
     {
-        return $this->idBook;
+        return $this->book;
     }
 
-    public function setIdBook(int $idBook): static
+    public function setBook(Book $book): static
     {
-        $this->idBook = $idBook;
+        $this->book = $book;
 
         return $this;
     }

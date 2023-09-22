@@ -15,11 +15,13 @@ class Favorite
     #[ORM\Column(name: 'idFavorite')]
     private ?int $idFavorite = null;
 
-    #[ORM\Column(name: 'idUser')]
-    private ?int $idUser = null;
-
-    #[ORM\Column(name: 'idBook')]
-    private ?int $idBook = null;
+    #[ORM\ManyToOne(inversedBy: 'evaluations')]
+    #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
+    private ?User $user = null;
+    
+    #[ORM\ManyToOne(inversedBy: 'evaluations')]
+    #[ORM\JoinColumn(name: 'idBook', referencedColumnName: 'idBook', nullable: false)]
+    private ?Book $book = null;
 
     #[ORM\Column(name: 'favoriteDate', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $favoriteDate = null;
@@ -29,26 +31,26 @@ class Favorite
         return $this->idFavorite;
     }
 
-    public function getIdUser(): ?int
+    public function getUser(): ?User
     {
-        return $this->idUser;
+        return $this->user;
     }
 
-    public function setIdUser(int $idUser): static
+    public function setUser(?User $user): static
     {
-        $this->idUser = $idUser;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getIdBook(): ?int
+    public function getBook(): ?Book
     {
-        return $this->idBook;
+        return $this->book;
     }
 
-    public function setIdBook(int $idBook): static
+    public function setBook(?Book $book): static
     {
-        $this->idBook = $idBook;
+        $this->book = $book;
 
         return $this;
     }
