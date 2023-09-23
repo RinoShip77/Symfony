@@ -41,7 +41,7 @@ class Book
     #[ORM\Column(name: 'isBorrowed')]
     private ?bool $isBorrowed = null;
 
-    #[ORM\Column(length: 15)]
+    #[ORM\Column(length: 30)]
     private ?string $cover = null;
 
     #[ORM\Column(name: 'publishedDate', type: Types::DATETIME_MUTABLE)]
