@@ -15,12 +15,6 @@ class Book
     #[ORM\Column(name: 'idBook')]
     private ?int $idBook = null;
     
-    #[ORM\Column(name: 'idGenre')]
-    private ?int $idGenre = null;
-    
-    #[ORM\Column(name: 'idAuthor')]
-    private ?int $idAuthor = null;
-    
     #[ORM\Column(length: 100)]
     private ?string $title = null;
 
@@ -43,33 +37,44 @@ class Book
     private ?string $originalLanguage = null;
 
 
+    #[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
+    #[ORM\JoinColumn(name:'idGenre', referencedColumnName:'idGenre')]
+    // La variable de la relation (Foreign Key)
+    private $genre;
+
+    #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
+    #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
+    // La variable de la relation (Foreign Key)
+    private $author;
+
+    public function getGenre(): ?Genre
+    {
+        return $this->genre;
+    }
+
+    public function setGenre(Genre $genre): self
+    {
+        $this->genre = $genre;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(Author $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+
     public function getIdBook(): ?int
     {
         return $this->idBook;
-    }
-
-    public function getIdGenre(): ?int
-    {
-        return $this->idGenre;
-    }
-
-    public function setIdGenre(int $idGenre): static
-    {
-        $this->idGenre = $idGenre;
-
-        return $this;
-    }
-
-    public function getIdAuthor(): ?int
-    {
-        return $this->idAuthor;
-    }
-
-    public function setIdAuthor(int $idAuthor): static
-    {
-        $this->idAuthor = $idAuthor;
-
-        return $this;
     }
 
     public function getTitle(): ?string

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\AuthorRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
@@ -19,6 +20,10 @@ class Author
 
     #[ORM\Column(name: 'lastName', length: 50)]
     private ?string $lastName = null;
+
+    #[ORM\OneToMany(targetEntity:Book::class, mappedBy:"author", fetch:"LAZY")]
+    // La variable de la relation (Foreign Key)
+    private $books;
 
     public function getIdAuthor(): ?int
     {
@@ -47,5 +52,9 @@ class Author
         $this->lastName = $lastName;
 
         return $this;
+    }
+
+    public function getBooks() : Collection {
+        return $this->books;
     }
 }

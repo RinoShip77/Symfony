@@ -28,24 +28,24 @@ class UserController extends AbstractController
 	#[Route('/users/connection')]
 	public function connection(Request $request, Connection $connection): JsonResponse
 	{
-		$email = $request->request->get('email');
+		$memberNumber = $request->request->get('memberNumber');
 		$password = $request->request->get('password');
 
-		$user = $connection->FetchAllAssociative("SELECT * FROM users WHERE email = '$email' AND password = '$password'");
+		$user = $connection->FetchAllAssociative("SELECT * FROM users WHERE memberNumber = '$memberNumber' AND password = '$password'");
 
 		if (isset($user[0])) {
 			if ($user[0]['password'] === $password) {
 				$newUser['idUser'] = $user[0]['idUser'];
-				$newUser['email'] = $user[0]['email'];
+				$newUser['memberNumber'] = $user[0]['memberNumber'];
+				$newUser['password'] = $user[0]['password'];
 				$newUser['registrationDate'] = $user[0]['registrationDate'];
 				$newUser['firstName'] = $user[0]['firstName'];
 				$newUser['lastName'] = $user[0]['lastName'];
-				$newUser['address'] = $user[0]['address'];
 				$newUser['profilePicture'] = $user[0]['profilePicture'];
+				$newUser['address'] = $user[0]['address'];
 				$newUser['phoneNumber'] = $user[0]['phoneNumber'];
 				$newUser['postalCode'] = $user[0]['postalCode'];
 				$newUser['roles'] = $user[0]['roles'];
-				$newUser['password'] = $user[0]['password'];
 				return $this->json($newUser);
 			} else {
 				return $this->json("erreur 112");
