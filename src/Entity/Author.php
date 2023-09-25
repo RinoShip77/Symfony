@@ -22,8 +22,8 @@ class Author
     #[ORM\Column(name: 'lastName', length: 50)]
     private ?string $lastName = null;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
-    private Collection $books;
+    // #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
+    // private Collection $books;
 
     public function __construct()
     {
@@ -67,33 +67,33 @@ class Author
         return $this->books;
     }
 
-    /**
-     * @return Collection<int, Book>
-     */
-    public function getBooks(): Collection
-    {
-        return $this->books;
-    }
+    // /**
+    //  * @return Collection<int, Book>
+    //  */
+    // public function getBooks(): Collection
+    // {
+    //     return $this->books;
+    // }
 
-    public function addBook(Book $book): static
-    {
-        if (!$this->books->contains($book)) {
-            $this->books->add($book);
-            $book->setAuthor($this);
-        }
+    // public function addBook(Book $book): static
+    // {
+    //     if (!$this->books->contains($book)) {
+    //         $this->books->add($book);
+    //         $book->setAuthor($this);
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeBook(Book $book): static
-    {
-        if ($this->books->removeElement($book)) {
-            // set the owning side to null (unless already changed)
-            if ($book->getAuthor() === $this) {
-                $book->setAuthor(null);
-            }
-        }
+    // public function removeBook(Book $book): static
+    // {
+    //     if ($this->books->removeElement($book)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($book->getAuthor() === $this) {
+    //             $book->setAuthor(null);
+    //         }
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 }
