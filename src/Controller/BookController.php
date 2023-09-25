@@ -38,4 +38,14 @@ class BookController extends AbstractController
 
         return $this->json($books);
     }
+
+    #[Route('/getBook/{idBook}')]
+    public function getOne($idBook,Request $request, Connection $connexion):JsonResponse
+    {
+
+        $query = "SELECT * from books WHERE idBook=$idBook";
+
+        $book = $connexion->fetchAssociative($query);
+        return $this->json($book);
+    }
 }
