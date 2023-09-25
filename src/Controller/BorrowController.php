@@ -21,4 +21,13 @@ class BorrowController extends AbstractController
         $borrows = $connexion->fetchAllAssociative("SELECT * FROM borrows");
         return $this->json($borrows);
     }
+
+    #[Route('/borrows/{idUser}')]
+    public function getBorrowsFromUser($idUser, Request $request, Connection $connexion): JsonResponse
+    {
+        //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
+        echo $idUser;
+        $borrows = $connexion->fetchAllAssociative("SELECT * FROM borrows WHERE idUser = $idUser");
+        return $this->json($borrows);
+    }
 }

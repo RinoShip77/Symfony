@@ -22,6 +22,9 @@ class Author
     #[ORM\Column(name: 'lastName', length: 50)]
     private ?string $lastName = null;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity:Book::class, orphanRemoval: true, cascade:['persist'])]
+    private Collection $commandes;
+
     // #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
     // private Collection $books;
 
