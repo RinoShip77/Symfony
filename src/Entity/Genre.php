@@ -22,8 +22,8 @@ class Genre
     #[ORM\Column(length: 50)]
     private ?string $icon = null;
 
-    #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Book::class)]
-    private Collection $books;
+    // #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Book::class)]
+    // private Collection $books;
 
     public function __construct()
     {
@@ -63,35 +63,35 @@ class Genre
         return $this;
     }
 
-    /**
-     * @return Collection<int, Book>
-     */
-    public function getBooks(): Collection
-    {
-        return $this->books;
-    }
+    // /**
+    //  * @return Collection<int, Book>
+    //  */
+    // public function getBooks(): Collection
+    // {
+    //     return $this->books;
+    // }
 
-    public function addBook(Book $book): static
-    {
-        if (!$this->books->contains($book)) {
-            $this->books->add($book);
-            $book->setGenre($this);
-        }
+    // public function addBook(Book $book): static
+    // {
+    //     if (!$this->books->contains($book)) {
+    //         $this->books->add($book);
+    //         $book->setGenre($this);
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeBook(Book $book): static
-    {
-        if ($this->books->removeElement($book)) {
-            // set the owning side to null (unless already changed)
-            if ($book->getGenre() === $this) {
-                $book->setGenre(null);
-            }
-        }
+    // public function removeBook(Book $book): static
+    // {
+    //     if ($this->books->removeElement($book)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($book->getGenre() === $this) {
+    //             $book->setGenre(null);
+    //         }
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getBooks() : Collection {
         return $this->books;

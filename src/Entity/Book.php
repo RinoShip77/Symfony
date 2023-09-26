@@ -17,10 +17,18 @@ class Book
     #[ORM\Column(name: 'idBook')]
     private ?int $idBook = null;
 
+    // #[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
+    // #[ORM\JoinColumn(name:'idGenre', referencedColumnName:'idGenre')]
+    // La variable de la relation (Foreign Key)
+    // private $genre;
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(name: 'idGenre', referencedColumnName: 'idGenre', nullable: false)]
     private ?Genre $genre = null;
 
+    // #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
+    // #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
+    // // La variable de la relation (Foreign Key)
+    // private $author;
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(name: 'idAuthor', referencedColumnName: 'idAuthor', nullable: false)]
     private ?Author $author = null;
@@ -73,7 +81,7 @@ class Book
     public function getIdBook(): ?int
     {
         return $this->idBook;
-    }
+    }    
 
     #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
     #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
