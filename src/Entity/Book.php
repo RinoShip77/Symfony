@@ -56,10 +56,10 @@ class Book
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
     private Collection $favorites;
 
-    #[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
+    /*#[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
     #[ORM\JoinColumn(name:'idGenre', referencedColumnName:'idGenre')]
     // La variable de la relation (Foreign Key)
-    private $genre;
+    private $genre;*/
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
     private Collection $reservations;
 
@@ -78,7 +78,7 @@ class Book
     #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
     #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
     // La variable de la relation (Foreign Key)
-    private $author;
+    //private $author;
 
     public function getGenre(): ?Genre
     {
@@ -86,7 +86,6 @@ class Book
     }
 
     public function setGenre(Genre $genre): self
-    public function setGenre(?Genre $genre): static
     {
         $this->genre = $genre;
 
@@ -103,12 +102,6 @@ class Book
         $this->author = $author;
 
         return $this;
-    }
-
-
-    public function getIdBook(): ?int
-    {
-        return $this->idBook;
     }
 
     public function getTitle(): ?string
