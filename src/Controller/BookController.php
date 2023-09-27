@@ -19,22 +19,9 @@ class BookController extends AbstractController
     #[Route('/books')]
     public function getAll(Request $request, Connection $connexion): JsonResponse
     {
-        $query = "SELECT b.*, a.*, g.* 
-            FROM books b 
-            INNER JOIN authors a ON b.idAuthor = a.idAuthor 
-            INNER JOIN genres g ON b.idGenre = g.idGenre";
-
-        /*if ($idGenre && $search) {
-            $query .= " WHERE title LIKE '%$search%' AND idGenre IN($idGenre)";
-        }
-
-        if($idGenre && !$search) {
-            $query .= " WHERE idGenre IN($idGenre)";
-        }
-        
-        if(!$idGenre && $search) {
-            $query .= " WHERE title LIKE '%$search%'";
-        }*/
+        $idGenre = $request->request->get('idGenre');
+        $search = $request->request->get('search');
+        $query = "SELECT b.*, a.*, g.* FROM books b INNER JOIN genres g ON b.idGenre = g.idGenre INNER JOIN authors a ON b.idAuthor = a.idAuthor";
 
         $booksData = $connexion->fetchAllAssociative($query);
 
@@ -42,6 +29,8 @@ class BookController extends AbstractController
         foreach ($booksData as $row) {
             $book = [
                 "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
                 "title" => $row["title"],
                 "description" => $row["description"],
                 "isbn" => $row["isbn"],
@@ -49,6 +38,13 @@ class BookController extends AbstractController
                 "cover" => $row["cover"],
                 "publishedDate" => $row["publishedDate"],
                 "originalLanguage" => $row["originalLanguage"],
+                "isFavorite" => $row["isFavorite"],
+            ];
+
+            $genre = [
+                "idGenre" => $row["idGenre"],
+                "name" => $row["name"],
+                "icon" => $row["icon"]
             ];
 
             $author = [
@@ -57,13 +53,13 @@ class BookController extends AbstractController
                 "lastName" => $row["lastName"],
             ];
 
-            $genre = [
-                "idGenre" => $row["idGenre"],
-                "name" => $row["name"],
+            $borrow = [
+                "idBorrow" => $row["idBorrow"]
             ];
 
-            $book["author"] = $author;
             $book["genre"] = $genre;
+            $book["author"] = $author;
+            $book["borrow"] = $borrow;
             $books[] = $book;
         }
 
@@ -71,9 +67,8 @@ class BookController extends AbstractController
     }
 
     #[Route('/getBook/{idBook}')]
-    public function getOne($idBook, Request $request, Connection $connexion): JsonResponse
+    public function getOne($idBook, Connection $connexion): JsonResponse
     {
-
         $query = "SELECT * from books WHERE idBook=$idBook";
 
         $book = $connexion->fetchAssociative($query);
