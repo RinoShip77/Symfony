@@ -42,8 +42,8 @@ class Book
     #[ORM\Column(length: 255)]
     private ?string $isbn = null;
 
-    #[ORM\OneToOne(mappedBy: 'book', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'idBorrow', referencedColumnName: 'idBorrow', nullable: false)]
+    #[ORM\OneToOne(targetEntity:Borrow::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'idBorrow', referencedColumnName: 'idBorrow', nullable: true)]
     private ?Borrow $borrow = null;
 
     #[ORM\Column(name: 'isBorrowed')]
