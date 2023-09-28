@@ -17,18 +17,10 @@ class Book
     #[ORM\Column(name: 'idBook')]
     private ?int $idBook = null;
 
-    // #[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
-    // #[ORM\JoinColumn(name:'idGenre', referencedColumnName:'idGenre')]
-    // La variable de la relation (Foreign Key)
-    // private $genre;
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(name: 'idGenre', referencedColumnName: 'idGenre', nullable: false)]
     private ?Genre $genre = null;
 
-    // #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
-    // #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
-    // // La variable de la relation (Foreign Key)
-    // private $author;
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(name: 'idAuthor', referencedColumnName: 'idAuthor', nullable: false)]
     private ?Author $author = null;
@@ -41,10 +33,6 @@ class Book
 
     #[ORM\Column(length: 255)]
     private ?string $isbn = null;
-
-    #[ORM\OneToOne(mappedBy: 'book', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'idBorrow', referencedColumnName: 'idBorrow', nullable: false)]
-    private ?Borrow $borrow = null;
 
     #[ORM\Column(name: 'isBorrowed')]
     private ?bool $isBorrowed = null;
@@ -64,10 +52,6 @@ class Book
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
     private Collection $favorites;
 
-    /*#[ORM\ManyToOne(targetEntity: Genre::class, inversedBy:"books", cascade:["persist"])]
-    #[ORM\JoinColumn(name:'idGenre', referencedColumnName:'idGenre')]
-    // La variable de la relation (Foreign Key)
-    private $genre;*/
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
     private Collection $reservations;
 
@@ -82,11 +66,6 @@ class Book
     {
         return $this->idBook;
     }    
-
-    #[ORM\ManyToOne(targetEntity: Author::class, inversedBy:"books", cascade:["persist"])]
-    #[ORM\JoinColumn(name:'idAuthor', referencedColumnName:'idAuthor')]
-    // La variable de la relation (Foreign Key)
-    //private $author;
 
     public function getGenre(): ?Genre
     {
@@ -148,7 +127,7 @@ class Book
         return $this;
     }
 
-    public function getBorrow(): ?Borrow
+    /*public function getBorrow(): ?Borrow
     {
         return $this->borrow;
     }
@@ -163,7 +142,7 @@ class Book
         $this->borrow = $borrow;
 
         return $this;
-    }
+    }*/
 
     public function isIsBorrowed(): ?bool
     {
@@ -177,12 +156,12 @@ class Book
         return $this;
     }
 
-    public function getCover(): ?int
+    public function getCover(): ?string
     {
         return $this->cover;
     }
 
-    public function setCover(int $cover): static
+    public function setCover(string $cover): static
     {
         $this->cover = $cover;
 
