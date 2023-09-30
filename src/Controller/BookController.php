@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Util;
+use App\Tools;
 
 header('Access-Control-Allow-Origin: *');
 
@@ -21,6 +21,7 @@ class BookController extends AbstractController
 {
 
     private $em = null;
+    private $imagesDirectory = "./images/books/";
 
     //--------------------------------
     // Route to get all the books
@@ -95,55 +96,94 @@ class BookController extends AbstractController
     #[Route('/createBook')]
     public function createBook(Request $req, ManagerRegistry $doctrine): JsonResponse
     {
-
+        
         if ($req->getMethod() == 'POST') {
-
+            
             $this->em = $doctrine->getManager();
-
             $book = new Book();
-            $book->setTitle($req->request->get('title'));
-            $book->setDescription($req->request->get('description'));
-            $book->setIsbn($req->request->get('isbn'));
-
-            $book->setPublishedDate(new \DateTime($req->request->get('publishedDate')));
-            $book->setOriginalLanguage($req->request->get('originalLanguage'));
-            $book->setIsBorrowed($req->request->get('isBorrowed'));
-
-            // Attribut inutile?
-            //$book->setCover($req->request->get('cover'));
-            $book->setCover("/");
-
-            $idAuthor = $req->request->get('idAuthor');
-            $author = $this->em->getRepository(Author::class)->find($idAuthor);
-            $book->setAuthor($author);
-
-            $idGenre = $req->request->get('idGenre');
-            $genre = $this->em->getRepository(Genre::class)->find($idGenre);
-            $book->setGenre($genre);
+            $this->setBook($req, $book);
 
             $this->em->persist($book);
             $this->em->flush();
 
-            $retBook['idBook'] = $book->getIdBook();
-            $retBook['title'] = $book->getTitle();
-            $retBook['description'] = $book->getDescription();
-            $retBook['isbn'] = $book->getIsbn();
-            $retBook['publishedDate'] = $book->getPublishedDate();
-            $retBook['originalLanguage'] = $book->getOriginalLanguage();
-
             // Gestion de l'image téléversée
             $uploadedFile = $req->files->get('cover');
-            $destinationDirectory = './images/books/';
             $newFilename = $book->getIdBook() . ".png";
 
             try {
-                $uploadedFile->move($destinationDirectory, $newFilename);
+                $uploadedFile->move($this->imagesDirectory, $newFilename);
             } catch (FileException $e) {
                 return new Response('File upload failed: ' . $e->getMessage(), 500);
             }
 
-            return $this->json($retBook);
+            return new JsonResponse(['message' => 'Book created successfully']);
         }
+    }
+
+    //--------------------------------
+    // Modifie les informations d'un livre en base de données
+    //--------------------------------
+    #[Route('/updateBook/{idBook}')]
+    public function updateBook($idBook, Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+
+        if ($req->getMethod() == 'POST') {
+            
+            $this->em = $doctrine->getManager();
+            $book = $this->em->getRepository(Book::class)->find($idBook);
+
+            if (!$book) {
+                return new JsonResponse(['error' => 'Book not found'], 404);
+            }
+
+            $this->setBook($req, $book);
+
+            $this->em->persist($book);
+            $this->em->flush();
+
+            // Gestion de l'image téléversée
+            $uploadedFile = $req->files->get('cover');
+            // Si une image a été transmise
+            if (strlen($uploadedFile) > 0) {
+                $newFilename = $book->getIdBook() . ".png";
+                
+                //Supprime l'image déjà existante avant d'en créer une nouvelle
+                if ($this->deleteImage($newFilename)) {
+                    try {
+                        $uploadedFile->move($this->imagesDirectory, $newFilename);
+                    } catch (FileException $e) {
+                        return new Response('File upload failed: ' . $e->getMessage(), 500);
+                    }
+                }
+            }
+            
+            return new JsonResponse(['message' => 'Book updated successfully']);
+        }
+    }
+
+    //--------------------------------
+    // Applique les informations transmises à un livre
+    //--------------------------------
+    function setBook($req, $book) {
+        $book->setTitle($req->request->get('title'));
+        $book->setDescription($req->request->get('description'));
+        $book->setIsbn($req->request->get('isbn'));
+
+        $book->setPublishedDate(new \DateTime($req->request->get('publishedDate')));
+        $book->setOriginalLanguage($req->request->get('originalLanguage'));
+        $book->setIsBorrowed($req->request->get('isBorrowed'));
+
+        // Attribut inutile?
+        //$book->setCover($req->request->get('cover'));
+        $book->setCover("/");
+
+        $idAuthor = $req->request->get('idAuthor');
+        $author = $this->em->getRepository(Author::class)->find($idAuthor);
+        $book->setAuthor($author);
+
+        $idGenre = $req->request->get('idGenre');
+        $genre = $this->em->getRepository(Genre::class)->find($idGenre);
+        $book->setGenre($genre);
     }
 
     // À implémenter dans la vérification de l'image (plus-tard)
@@ -154,6 +194,20 @@ class BookController extends AbstractController
         
         if (preg_match($pattern, $name))
             return true;
+        return false;
+    }
+
+    function deleteImage($filename)
+    {
+        $imagePath = $this->imagesDirectory . $filename;
+
+        if (file_exists($imagePath)) {
+            // Supprime l'image
+            unlink($imagePath);
+
+            return true;
+        }
+        throw $this->createNotFoundException('The image does not exist');
         return false;
     }
 }
