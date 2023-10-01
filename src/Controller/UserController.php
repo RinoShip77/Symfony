@@ -39,6 +39,7 @@ class UserController extends AbstractController
 				$newUser['memberNumber'] = $user[0]['memberNumber'];
 				$newUser['password'] = $user[0]['password'];
 				$newUser['registrationDate'] = $user[0]['registrationDate'];
+				$newUser['email'] = $user[0]['email'];
 				$newUser['firstName'] = $user[0]['firstName'];
 				$newUser['lastName'] = $user[0]['lastName'];
 				$newUser['profilePicture'] = $user[0]['profilePicture'];
