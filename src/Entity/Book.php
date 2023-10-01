@@ -24,6 +24,10 @@ class Book
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(name: 'idAuthor', referencedColumnName: 'idAuthor', nullable: false)]
     private ?Author $author = null;
+
+    #[ORM\ManyToOne(inversedBy: 'books')]
+    #[ORM\JoinColumn(name: 'idStatus', referencedColumnName: 'idStatus', nullable: false)]
+    private ?Status $status = null;
     
     #[ORM\Column(length: 100)]
     private ?string $title = null;
@@ -33,9 +37,6 @@ class Book
 
     #[ORM\Column(length: 255)]
     private ?string $isbn = null;
-
-    #[ORM\Column(name: 'isBorrowed')]
-    private ?bool $isBorrowed = null;
 
     #[ORM\Column(length: 30)]
     private ?string $cover = null;
@@ -87,6 +88,18 @@ class Book
     public function setAuthor(Author $author): self
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(Status $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
@@ -143,18 +156,6 @@ class Book
 
         return $this;
     }*/
-
-    public function isIsBorrowed(): ?bool
-    {
-        return $this->isBorrowed;
-    }
-
-    public function setIsBorrowed(bool $isBorrowed): static
-    {
-        $this->isBorrowed = $isBorrowed;
-
-        return $this;
-    }
 
     public function getCover(): ?string
     {
