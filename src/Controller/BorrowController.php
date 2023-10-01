@@ -16,9 +16,41 @@ class BorrowController extends AbstractController
     // Route to get all the borrows
     //--------------------------------
     #[Route('/borrows')]
-    public function getAllFromUser(Request $request, Connection $connexion): JsonResponse
+    public function getAllBorrows(Request $request, Connection $connexion): JsonResponse
     {
-        $borrows = $connexion->fetchAllAssociative("SELECT * FROM borrows");
+        $query = "SELECT b.*, u.*, o.* 
+            FROM borrows b 
+            INNER JOIN users u ON b.idUser = u.idUser 
+            INNER JOIN books o ON b.idBook = o.idBook";
+
+        $borrowsData = $connexion->fetchAllAssociative($query);
+        
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+            
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "title" => $row["title"],
+            ];
+
+            $borrow["user"] = $user;
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
         return $this->json($borrows);
     }
 

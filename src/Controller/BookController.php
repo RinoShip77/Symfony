@@ -27,7 +27,7 @@ class BookController extends AbstractController
     // Route to get all the books
     //--------------------------------
     #[Route('/books')]
-    public function getAll(Request $request, Connection $connexion): JsonResponse
+    public function getAllBooks(Request $request, Connection $connexion): JsonResponse
     {
         $query = "SELECT b.*, a.*, g.* 
             FROM books b 
@@ -80,7 +80,7 @@ class BookController extends AbstractController
         return $this->json($books);
     }
 
-    #[Route('/getBook/{idBook}')]
+    #[Route('/get-book/{idBook}')]
     public function getOne($idBook, Request $request, Connection $connexion): JsonResponse
     {
 
@@ -93,7 +93,7 @@ class BookController extends AbstractController
     //--------------------------------
     // Créer un livre en base de données
     //--------------------------------
-    #[Route('/createBook')]
+    #[Route('/create-book')]
     public function createBook(Request $req, ManagerRegistry $doctrine): JsonResponse
     {
         
@@ -123,7 +123,7 @@ class BookController extends AbstractController
     //--------------------------------
     // Modifie les informations d'un livre en base de données
     //--------------------------------
-    #[Route('/updateBook/{idBook}')]
+    #[Route('/update-book/{idBook}')]
     public function updateBook($idBook, Request $req, ManagerRegistry $doctrine): JsonResponse
     {
 
