@@ -11,7 +11,7 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 
 
-class Util
+class util
 {
     //-----------------------------------
 	//
