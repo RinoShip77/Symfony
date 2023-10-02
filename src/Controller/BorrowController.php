@@ -26,11 +26,38 @@ class BorrowController extends AbstractController
     public function getBorrowsFromUser($idUser, Request $request, Connection $connexion): JsonResponse
     {
         //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
-        $borrows = $connexion->fetchAllAssociative("
+        $borrowsData = $connexion->fetchAllAssociative("
         SELECT * FROM borrows b
         INNER JOIN books g ON b.idBook = g.idBook
         WHERE idUser = $idUser
         ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
 
         return $this->json($borrows);
     }
@@ -39,12 +66,39 @@ class BorrowController extends AbstractController
     public function getBorrowsOrderedBy($idUser, $order, Request $request, Connection $connexion): JsonResponse
     {
         //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
-        $borrows = $connexion->fetchAllAssociative("
+        $borrowsData = $connexion->fetchAllAssociative("
         SELECT * FROM borrows b
         INNER JOIN books g ON b.idBook = g.idBook
         WHERE idUser = $idUser
         ORDER BY b.$order
         ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
 
         return $this->json($borrows);
     }
