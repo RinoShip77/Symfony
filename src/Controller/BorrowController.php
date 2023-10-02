@@ -7,6 +7,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Borrow;
+use App\Entity\Book;
+use App\Entity\User;
+use Doctrine\Persistence\ManagerRegistry;
 
 header('Access-Control-Allow-Origin: *');
 
@@ -79,6 +84,35 @@ class BorrowController extends AbstractController
         ");
 
         return $this->json($borrows);
+    }
+
+    #[Route('/create-Borrow')]
+    public function createBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+        
+        if ($req->getMethod() == 'POST') {
+            
+            $this->em = $doctrine->getManager();
+            $borrow = new Borrow();
+            $borrow = $this->setBorrow($req, $borrow);
+            $this->em->persist($borrow);
+            $this->em->flush();
+
+            return new JsonResponse(['message' => 'Borrow created successfully']);
+        }
+    }
+
+    function setBorrow($req, $borrow) {
+        $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+        $user = $this->em->getRepository(User::class)->find($req->request->get('idUser'));
+
+        $borrow->setUser($user);
+        $borrow->setBook($book);
+
+        $borrow->setBorrowedDate(new \DateTime());
+        $borrow->setDueDate(new \DateTime('+1 week'));
+
+        return $borrow;
     }
 
     

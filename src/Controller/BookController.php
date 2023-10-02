@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Tools;
 
+
 header('Access-Control-Allow-Origin: *');
 
 class BookController extends AbstractController
