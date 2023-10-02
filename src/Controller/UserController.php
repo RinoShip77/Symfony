@@ -72,6 +72,10 @@ class UserController extends AbstractController
 
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
+		
+		if ($action === 'updatePassword') {
+			$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
+		}
 
 		if ($action === 'updateInformations') {
 			$user->setEmail($request->request->get('email'));
@@ -84,9 +88,19 @@ class UserController extends AbstractController
 			$this->em->getRepository(User::class)->save($user, true);
 		}
 
-		if ($action === 'updatePassword') {
-			$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
-		}
+		return $this->json($user);
+	}
+	
+	//--------------------------------
+	// Connect a user to the application
+	//--------------------------------
+	#[Route('/user/{idUser}/delete')]
+	public function deleteProfile($idUser, Request $request, ManagerRegistry $doctrine): JsonResponse
+	{
+		$this->em = $doctrine->getManager();
+
+		$user = $this->em->getRepository(User::class)->find($idUser);
+		$this->em->getRepository(User::class)->remove($user, true);
 
 		return $this->json($user);
 	}
