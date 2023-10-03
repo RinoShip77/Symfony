@@ -11,9 +11,9 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 
 
-class util
+class Tools
 {
-    //-----------------------------------
+  //-----------------------------------
 	//
 	//-----------------------------------
     public static function logmsg($msg="", $traceUp=true, $ligne=true, $afficheDate=true)

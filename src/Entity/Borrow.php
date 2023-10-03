@@ -29,7 +29,7 @@ class Borrow
     #[ORM\Column(name: 'dueDate', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dueDate = null;
 
-    #[ORM\Column(name: 'returnedDate', type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(name: 'returnedDate', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $returnedDate = null;
 
     public function getIdBorrow(): ?int

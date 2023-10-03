@@ -7,6 +7,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Borrow;
+use App\Entity\Book;
+use App\Entity\User;
+use App\Entity\Status;
+use Doctrine\Persistence\ManagerRegistry;
 
 header('Access-Control-Allow-Origin: *');
 
@@ -16,9 +22,41 @@ class BorrowController extends AbstractController
     // Route to get all the borrows
     //--------------------------------
     #[Route('/borrows')]
-    public function getAllFromUser(Request $request, Connection $connexion): JsonResponse
+    public function getAllBorrows(Request $request, Connection $connexion): JsonResponse
     {
-        $borrows = $connexion->fetchAllAssociative("SELECT * FROM borrows");
+        $query = "SELECT b.*, u.*, o.* 
+            FROM borrows b 
+            INNER JOIN users u ON b.idUser = u.idUser 
+            INNER JOIN books o ON b.idBook = o.idBook";
+
+        $borrowsData = $connexion->fetchAllAssociative($query);
+        
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+            
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "title" => $row["title"],
+            ];
+
+            $borrow["user"] = $user;
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
         return $this->json($borrows);
     }
 
@@ -48,6 +86,53 @@ class BorrowController extends AbstractController
 
         return $this->json($borrows);
     }
+
+
+    //je vais repasser pour split la fonction en deux avec setStatusBorrowed
+    #[Route('/create-Borrow')]
+    public function createBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+        
+        if ($req->getMethod() == 'POST') {
+            
+            $this->em = $doctrine->getManager();
+            $borrow = new Borrow();
+            $borrow = $this->setBorrow($req, $borrow);
+            $this->em->persist($borrow);
+            $this->em->flush();
+            //$this->setStatusBorrowed($req);
+            $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+            $status = $this->em->getRepository(Status::class)->find(2);
+            $book->setStatus($status);
+            $this->em->persist($book);
+            $this->em->flush();
+
+            return new JsonResponse(['message' => 'Borrow created successfully']);
+        }
+    }
+
+    function setBorrow($req, $borrow) {
+        $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+        $user = $this->em->getRepository(User::class)->find($req->request->get('idUser'));
+
+        $borrow->setUser($user);
+        $borrow->setBook($book);
+
+        $borrow->setBorrowedDate(new \DateTime());
+        $borrow->setDueDate(new \DateTime('+1 week'));
+
+        return $borrow;
+    }
+
+
+    //dans la requete jai le id du livre, donc jenvoie la requete pis je change le status du livre que son id est dans la requete
+   // function setStatusBorrowed($req,ManagerRegistry $doctrine){
+   ///     $this->em = $doctrine->getManager();
+   ///     $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+   ///     $book->setStatus(2);
+   ///     $this->$em->persist($book);
+   ///     $this->$em->flush();
+  //  }
 
     
 }
