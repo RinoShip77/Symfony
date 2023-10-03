@@ -77,6 +77,15 @@ class UserController extends AbstractController
 			$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
 		}
 
+		if($action === 'deactivateAccount') {
+			$user->setRoles(['ROLE_DEACTIVATE']);
+			$this->em->getRepository(User::class)->save($user, true);
+		}
+
+		if($action === 'deleteAccount') {
+			$this->em->getRepository(User::class)->remove($user, true);
+		}
+
 		if ($action === 'updateInformations') {
 			$user->setEmail($request->request->get('email'));
 			$user->setFirstName($request->request->get('firstName'));
@@ -87,20 +96,6 @@ class UserController extends AbstractController
 
 			$this->em->getRepository(User::class)->save($user, true);
 		}
-
-		return $this->json($user);
-	}
-	
-	//--------------------------------
-	// Connect a user to the application
-	//--------------------------------
-	#[Route('/user/{idUser}/delete')]
-	public function deleteProfile($idUser, Request $request, ManagerRegistry $doctrine): JsonResponse
-	{
-		$this->em = $doctrine->getManager();
-
-		$user = $this->em->getRepository(User::class)->find($idUser);
-		$this->em->getRepository(User::class)->remove($user, true);
 
 		return $this->json($user);
 	}
