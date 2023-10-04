@@ -19,7 +19,7 @@ class Borrow
     #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
     private ?User $user = null;
 
-    #[ORM\OneToOne(inversedBy: 'borrow', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'borrows', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(name: 'idBook', referencedColumnName: 'idBook', nullable: false)]
     private ?Book $book = null;
 

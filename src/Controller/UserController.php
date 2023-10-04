@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
 class UserController extends AbstractController
