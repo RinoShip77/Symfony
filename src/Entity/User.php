@@ -35,7 +35,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $lastName = null;
     
     #[ORM\Column(name: 'profilePicture', length: 255, nullable: true)]
-    private ?string $profilePicture = null;
+    private ?string $profilePicture = '/';
     
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $address = null;
