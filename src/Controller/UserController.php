@@ -75,6 +75,22 @@ class UserController extends AbstractController
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
 
+		if ($action === 'updateProfilePicture') {
+			$uploadedFile = $request->files->get('profilePicture');
+
+			if (strlen($uploadedFile) > 0) {
+				$newFilename = $user->getIdUser() . ".png";
+
+				if (Tools::deleteImage($this->imagesDirectory, $newFilename)) {
+					try {
+						$uploadedFile->move($this->imagesDirectory, $newFilename);
+					} catch (FileException $e) {
+						return $this->json('File upload failed: ' . $e->getMessage(), 500);
+					}
+				}
+			}
+		}
+
 		if ($action === 'updatePassword') {
 			$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
 		}
@@ -115,8 +131,8 @@ class UserController extends AbstractController
 
 		if (strlen($uploadedFile) > 0) {
 			$newFilename = $user->getIdUser() . ".png";
-			
-			if ($this->deleteImage($newFilename)) {
+
+			if (Tools::deleteImage($this->imagesDirectory, $newFilename)) {
 				try {
 					$uploadedFile->move($this->imagesDirectory, $newFilename);
 				} catch (FileException $e) {
@@ -126,18 +142,5 @@ class UserController extends AbstractController
 		}
 
 		return $this->json($user);
-	}
-
-	function deleteImage($filename)
-	{
-		$imagePath = $this->imagesDirectory . $filename;
-
-		if (file_exists($imagePath)) {
-			unlink($imagePath);
-
-			return true;
-		}
-		throw $this->createNotFoundException('The image does not exist');
-		return false;
 	}
 }
