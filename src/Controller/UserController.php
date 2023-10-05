@@ -19,6 +19,11 @@ class UserController extends AbstractController
 	private $em = null;
 	private $imagesDirectory = "./images/users/";
 
+	public function __construct(ManagerRegistry $doctrine)
+	{
+		$this->em = $doctrine->getManager();
+	}
+
 	//--------------------------------
 	// Route to get all the users
 	//--------------------------------
@@ -54,6 +59,7 @@ class UserController extends AbstractController
 				$newUser['phoneNumber'] = $user[0]['phoneNumber'];
 				$newUser['postalCode'] = $user[0]['postalCode'];
 				$newUser['roles'] = $user[0]['roles'];
+
 				return $this->json($newUser);
 			} else {
 				return $this->json("erreur 112");
@@ -67,79 +73,51 @@ class UserController extends AbstractController
 	//--------------------------------
 	// Connect a user to the application
 	//--------------------------------
-	#[Route('/user/{idUser}/modifier')]
-	public function updateProfile($idUser, Request $request, ManagerRegistry $doctrine): JsonResponse
+	#[Route('/user/{idUser}')]
+	public function updateProfile($idUser, Request $request): JsonResponse
 	{
-		$this->em = $doctrine->getManager();
-
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
 
-		if ($action === 'updateProfilePicture') {
-			$uploadedFile = $request->files->get('profilePicture');
+		switch ($action) {
+			case 'updateProfilePicture':
+				$uploadedFile = $request->files->get('profilePicture');
 
-			if (strlen($uploadedFile) > 0) {
-				$newFilename = $user->getIdUser() . ".png";
+				if (strlen($uploadedFile) > 0) {
+					$newFilename = $user->getIdUser() . ".png";
 
-				if (Tools::deleteImage($this->imagesDirectory, $newFilename)) {
-					try {
-						$uploadedFile->move($this->imagesDirectory, $newFilename);
-					} catch (FileException $e) {
-						return $this->json('File upload failed: ' . $e->getMessage(), 500);
+					if (Tools::deleteImage($this->imagesDirectory,  $newFilename)) {
+						try {
+							$uploadedFile->move($this->imagesDirectory, $newFilename);
+						} catch (FileException $e) {
+							return $this->json('File upload failed: ' . $e->getMessage(), 500);
+						}
 					}
 				}
-			}
-		}
+				break;
 
-		if ($action === 'updatePassword') {
-			$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
-		}
+			case 'updatePassword':
+				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
+				break;
 
-		if ($action === 'deactivateAccount') {
-			$user->setRoles(['ROLE_DEACTIVATE']);
-		}
+			case 'desactivate':
+				$user->setRoles(['ROLE_DEACTIVATE']);
+				break;
 
-		if ($action === 'deleteAccount') {
-			$this->em->getRepository(User::class)->remove($user, true);
-		}
+			case 'delete':
+				$this->em->getRepository(User::class)->remove($user, true);
+				break;
 
-		if ($action === 'updateInformations') {
-			$user->setEmail($request->request->get('email'));
-			$user->setFirstName($request->request->get('firstName'));
-			$user->setLastName($request->request->get('lastName'));
-			$user->setAddress($request->request->get('address'));
-			$user->setPostalCode($request->request->get('postalCode'));
-			$user->setPhoneNumber($request->request->get('phoneNumber'));
+			case 'updateInformations':
+				$user->setEmail($request->request->get('email'));
+				$user->setFirstName($request->request->get('firstName'));
+				$user->setLastName($request->request->get('lastName'));
+				$user->setAddress($request->request->get('address'));
+				$user->setPostalCode($request->request->get('postalCode'));
+				$user->setPhoneNumber($request->request->get('phoneNumber'));
+				break;
 		}
-
 		$this->em->getRepository(User::class)->save($user, true);
-
-		return $this->json($user);
-	}
-
-	//--------------------------------
-	// Connect a user to the application
-	//--------------------------------
-	#[Route('/user/{idUser}/modifierImage')]
-	public function updateProfilePicture($idUser, Request $request, ManagerRegistry $doctrine): JsonResponse
-	{
-		$this->em = $doctrine->getManager();
-
-		$user = $this->em->getRepository(User::class)->find($idUser);
-
-		$uploadedFile = $request->files->get('profilePicture');
-
-		if (strlen($uploadedFile) > 0) {
-			$newFilename = $user->getIdUser() . ".png";
-
-			if (Tools::deleteImage($this->imagesDirectory, $newFilename)) {
-				try {
-					$uploadedFile->move($this->imagesDirectory, $newFilename);
-				} catch (FileException $e) {
-					return $this->json('File upload failed: ' . $e->getMessage(), 500);
-				}
-			}
-		}
 
 		return $this->json($user);
 	}
