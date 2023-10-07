@@ -47,6 +47,9 @@ class Book
     #[ORM\Column(length: 255, name: 'originalLanguage')]
     private ?string $originalLanguage = null;
 
+    #[ORM\Column(name: 'isRecommended')]
+    private bool $isRecommended = false;
+
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
     private Collection $evaluations;
     
@@ -189,6 +192,18 @@ class Book
     public function setOriginalLanguage(string $originalLanguage): static
     {
         $this->originalLanguage = $originalLanguage;
+
+        return $this;
+    }
+
+    public function getIsRecommended(): ?bool
+    {
+        return $this->isRecommended;
+    }
+
+    public function setIsRecommended(bool $isRecommended): static
+    {
+        $this->isRecommended = $isRecommended;
 
         return $this;
     }

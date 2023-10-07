@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
 class ReservationController extends AbstractController
@@ -23,14 +24,15 @@ class ReservationController extends AbstractController
             INNER JOIN books b ON r.idBook = b.idBook";
 
         $reservationsData = $connexion->fetchAllAssociative($query);
-        
+
         $reservations = [];
         foreach ($reservationsData as $row) {
             $reservation = [
                 "idReservation" => $row["idReservation"],
                 "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"],
             ];
-            
+
             $user = [
                 "idUser" => $row["idUser"],
                 "memberNumber" => $row["memberNumber"],
@@ -49,5 +51,34 @@ class ReservationController extends AbstractController
             $reservations[] = $reservation;
         }
         return $this->json($reservations);
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/reservations-data')]
+    public function getReservationsData(Connection $connection)
+    {
+        $query = "SELECT
+        r.idReservation,
+        r.idUser AS reservationIdUser,
+        u1.memberNumber AS reservationMemberNumber,
+        bo.idUser AS borrowIdUser,
+        u2.memberNumber AS borrowMemberNumber,
+        bo.dueDate,
+        bo.idBorrow
+    FROM
+        reservations r
+    JOIN
+        users u1 ON r.idUser = u1.idUser
+    LEFT JOIN
+        borrows bo ON r.idBook = bo.idBook
+    LEFT JOIN
+        users u2 ON bo.idUser = u2.idUser
+        WHERE bo.returnedDate IS NULL";
+
+        $result = $connection->fetchAllAssociative($query);
+
+        return new JsonResponse($result);
     }
 }

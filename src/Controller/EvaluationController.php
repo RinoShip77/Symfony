@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
 class EvaluationController extends AbstractController
