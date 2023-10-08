@@ -172,6 +172,26 @@ class BorrowController extends AbstractController
         return $borrow;
     }
 
+    #[Route('/return-Borrow/{idBorrow}')]
+    public function returnBorrow($idBorrow,Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+
+        if ($req->getMethod() == 'POST') {
+
+            $this->em = $doctrine->getManager();
+            $borrow = new Borrow();
+            $borrow = $this->em->getRepository(Borrow::class)->find($idBorrow);
+            $borrow->setReturnedDate(new \DateTime());
+            $this->em->persist($borrow);
+            $this->em->flush();
+            //$this->setStatusBorrowed($req);
+
+            return new JsonResponse(['message' => 'Borrow returned successfully']);
+        }
+    }
+
+
+
 
     //dans la requete jai le id du livre, donc jenvoie la requete pis je change le status du livre que son id est dans la requete
     // function setStatusBorrowed($req,ManagerRegistry $doctrine){
