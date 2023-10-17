@@ -2,16 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Reservation;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Persistence\ManagerRegistry;
 
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
 class ReservationController extends AbstractController
 {
+    private $em = null;
+
     //--------------------------------
     // Route to get all the reservations
     //--------------------------------
@@ -51,6 +56,33 @@ class ReservationController extends AbstractController
             $reservations[] = $reservation;
         }
         return $this->json($reservations);
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/cancel-reservation/{idReservation}')]
+    public function cancelReservation($idReservation, Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+
+        if ($req->getMethod() == 'POST') {
+            $this->em = $doctrine->getManager();
+
+            $reservation = $this->em->getRepository(Reservation::class)->find($idReservation);
+
+
+            if (!$reservation) {
+                return new JsonResponse(['error' => 'Reservation not found'], 404);
+            }
+
+
+            $reservation->setIsActive(false);
+
+            $this->em->persist($reservation);
+            $this->em->flush();
+
+            return new JsonResponse(['message' => 'Reservation canceled successfully']);
+        }
     }
 
     //--------------------------------
