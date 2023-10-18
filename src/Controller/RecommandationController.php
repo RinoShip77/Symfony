@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Book;
 use App\Entity\Borrow;
 use App\Entity\User;
 use app\Entity\Genre;
@@ -33,7 +34,19 @@ class RecommandationController extends AbstractController
         $this->amountAuthors = $connexion->fetchAssociative("SELECT DISTINCT idAuthor FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $recommandedGenres = $this->RecommandedGenres();
         $recommandedAuthors= $this->RecommandedAuthors();
-        
+    
+
+        $qb = $this->em->createQueryBuilder();
+                 $qb->select('b')
+                    ->from('App\Entity\Book','b')
+                    ->innerJoin('b.genre','genre')
+                    ->innerJoin('b.author','author')
+                    ->where('genre.idGenre IN (:listGenre)')
+                    ->orWhere('author.idAuthor IN (:listAuthor)')
+                    ->distinct()
+                    ->setParameter('listGenre',$recommandedGenres)
+                    ->setParameter('listAuthor',$recommandedAuthors); 
+        $recomandedBooks=$qb->getQuery()->getResult();
         
 
         return $this->json([
@@ -60,7 +73,7 @@ class RecommandationController extends AbstractController
                         $counter++;
                     }
                 }
-                if($counter>(sizeof($this->borrows)/sizeof($this->amountGenres))){
+                if($counter>=(sizeof($this->borrows)/sizeof($this->amountGenres))){
                     $recommandedGenres[] = $genre;
                 }
             }
@@ -72,7 +85,6 @@ class RecommandationController extends AbstractController
     {
         $recommandedAuthors = [];
         $counter=0;
-        $treshold = sizeof($this->borrows)/sizeof($this->authors);
 
         if($this->borrows){
             foreach($this->authors as $author){
