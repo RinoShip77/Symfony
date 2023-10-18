@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Tools;
 
+
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
@@ -84,7 +85,7 @@ class BookController extends AbstractController
             $book["status"] = $status;
             $books[] = $book;
         }
-
+        var_dump($books);
         return $this->json($books);
     }
 

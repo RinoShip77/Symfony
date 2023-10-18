@@ -12,6 +12,15 @@ use App\Entity\User;
 use app\Entity\Genre;
 use App\Service\Recomandation;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Tools;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+
 
 class RecommandationController extends AbstractController
 {
@@ -24,19 +33,21 @@ class RecommandationController extends AbstractController
 
     #[Route('/recommandation/{idUser}', name: 'app_recommandation')]
     public function index($idUser,ManagerRegistry $doctrine,Connection $connexion): JsonResponse
-    {
+    {   
+        $encoders = [new XmlEncoder(), new JsonEncoder()];
+        $normalizers = [new ObjectNormalizer()];
+
+        $serializer = new Serializer($normalizers, $encoders);
+
         $this->em = $doctrine->getManager();
         $user = $this->em->getRepository(User::class)->find($idUser);
         $this->borrows = $this->em->getRepository(Borrow::class)->findBy(['user'=>$idUser]);
 
         if(count($this->borrows)<=6){
-            return $this->json([
-                "recomanded books"=>"aucune Recommandations"
-            ]);
+            return $this->json([]);
         }
         $this->genres = $this->em->getRepository(Genre::class)->findAll();
         $this->amountGenres = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idGenre) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
-        var_dump($this->amountGenres);
         $this->amountAuthors = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $recommandedGenres = $this->RecommandedGenres();
         $recommandedAuthors= $this->RecommandedAuthors();
@@ -87,16 +98,19 @@ class RecommandationController extends AbstractController
                ->distinct();
             array_push($recomandedBooks,...$qb->getQuery()->getResult());
         }
+        $jsonBook=[];
+        $jsonResponse=[];
+        foreach($recomandedBooks as $book){
+            $jsonBook['idBook']=$book->getIdBook();
+            $jsonBook['title']=$book->getTitle();
+            $jsonBook['description']=$book->getDescription();
+            $jsonBook['cover']=$book->getCover();
+            $jsonResponse[]=$jsonBook;
 
+        }
 
-        //var_dump($recomandedBooks);
-
-        return $this->json([
-            'recomended Genre' => $recommandedGenres,
-            'recommended Books' => $recomandedBooks,
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/RecommandationController.php',
-        ]);
+        //tools::logmsg($recomandedBooks);
+        return new JsonResponse($jsonResponse,);
     }
 
 
