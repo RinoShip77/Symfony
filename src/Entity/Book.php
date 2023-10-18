@@ -56,6 +56,10 @@ class Book
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
     private Collection $reservations;
 
+    #[ORM\Column(name: 'isRecommended')]
+    private ?bool $isRecommended = false;
+
+
     public function __construct()
     {
         $this->evaluations = new ArrayCollection();

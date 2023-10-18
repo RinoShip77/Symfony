@@ -19,21 +19,31 @@ class RecommandationController extends AbstractController
     private $borrows=[];
     private $genres=[];
     private $authors=[];
-    private $amountGenres;
+    private $amountGenres=[];
     private $amountAuthors;
 
-    #[Route('/recommandation', name: 'app_recommandation')]
-    public function index(ManagerRegistry $doctrine,Connection $connexion): JsonResponse
+    #[Route('/recommandation/{idUser}', name: 'app_recommandation')]
+    public function index($idUser,ManagerRegistry $doctrine,Connection $connexion): JsonResponse
     {
-        $idUser=1;
         $this->em = $doctrine->getManager();
         $user = $this->em->getRepository(User::class)->find($idUser);
         $this->borrows = $this->em->getRepository(Borrow::class)->findBy(['user'=>$idUser]);
+
+        if(count($this->borrows)<=6){
+            return $this->json([
+                "recomanded books"=>"aucune Recommandations"
+            ]);
+        }
         $this->genres = $this->em->getRepository(Genre::class)->findAll();
-        $this->amountGenres = $connexion->fetchAssociative("SELECT DISTINCT idGenre FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
-        $this->amountAuthors = $connexion->fetchAssociative("SELECT DISTINCT idAuthor FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
+        $this->amountGenres = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idGenre) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
+        var_dump($this->amountGenres);
+        $this->amountAuthors = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $recommandedGenres = $this->RecommandedGenres();
         $recommandedAuthors= $this->RecommandedAuthors();
+        $books=[];
+        foreach($this->borrows as $borrow){
+            array_push($books,$borrow->getBook());
+        }
     
 
         $qb = $this->em->createQueryBuilder();
@@ -43,17 +53,47 @@ class RecommandationController extends AbstractController
                     ->innerJoin('b.author','author')
                     ->where('genre.idGenre IN (:listGenre)')
                     ->orWhere('author.idAuthor IN (:listAuthor)')
+                    ->andWhere('b.isRecommended = TRUE')
+                    ->andWhere('b.idBook NOT IN (:books)')
                     ->distinct()
+                    ->setParameter('books',$books)
                     ->setParameter('listGenre',$recommandedGenres)
                     ->setParameter('listAuthor',$recommandedAuthors); 
         $recomandedBooks=$qb->getQuery()->getResult();
-        
+
+        if(count($recomandedBooks)<10){
+            $qb = $this->em->createQueryBuilder();
+            $qb->select('b')
+               ->from('App\Entity\Book','b')
+               ->innerJoin('b.genre','genre')
+               ->innerJoin('b.author','author')
+               ->where('genre.idGenre IN (:listGenre)')
+               ->orWhere('author.idAuthor IN (:listAuthor)')
+               ->andWhere('b.idBook NOT IN (:books)')
+               ->distinct()
+               ->setParameter('books',$books)
+               ->setParameter('listGenre',$recommandedGenres)
+               ->setParameter('listAuthor',$recommandedAuthors); 
+            array_push($recomandedBooks,...$qb->getQuery()->getResult());
+        }
+
+        if(count($recomandedBooks)<10){
+            $qb = $this->em->createQueryBuilder();
+            $qb->select('b')
+               ->from('App\Entity\Book','b')
+               ->where('b.isRecommended = TRUE')
+               ->andWhere('b.idBook NOT IN (:books)')
+               ->setParameter('books',$books)
+               ->distinct();
+            array_push($recomandedBooks,...$qb->getQuery()->getResult());
+        }
+
+
+        //var_dump($recomandedBooks);
 
         return $this->json([
-            'user'=>$user,
-            'borrows'=>$this->borrows,
-            'genre'=>$this->genres,
             'recomended Genre' => $recommandedGenres,
+            'recommended Books' => $recomandedBooks,
             'message' => 'Welcome to your new controller!',
             'path' => 'src/Controller/RecommandationController.php',
         ]);
@@ -73,7 +113,9 @@ class RecommandationController extends AbstractController
                         $counter++;
                     }
                 }
-                if($counter>=(sizeof($this->borrows)/sizeof($this->amountGenres))){
+                //var_dump($counter);
+                //var_dump((sizeof($this->borrows)/sizeof($this->amountGenres)));
+                if($counter>=(sizeof($this->borrows)/$this->amountGenres['COUNT(DISTINCT idGenre)'])){
                     $recommandedGenres[] = $genre;
                 }
             }
@@ -94,7 +136,7 @@ class RecommandationController extends AbstractController
                         $counter++;
                     }
                 }
-                if($counter>=(sizeof($this->borrows)/sizeof($this->amountAuthors))){
+                if($counter>=(sizeof($this->borrows)/$this->amountAuthors['COUNT(DISTINCT idAuthor)'])){
                     $recommandedAuthors[] = $authors;
                 }
             }
