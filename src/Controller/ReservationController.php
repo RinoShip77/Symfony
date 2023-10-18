@@ -54,7 +54,6 @@ class ReservationController extends AbstractController
                 "description" => $row["description"],
                 "cover" => $row["cover"],
                 "isbn" => $row["isbn"],
-                "isBorrowed" => $row["isBorrowed"],
                 "originalLanguage" => $row["originalLanguage"],
             ];
 
@@ -245,7 +244,7 @@ class ReservationController extends AbstractController
     }
 
     #[Route('/reservations/cancel/{idReservation}/')]
-    public function cancelReservation($idReservation, Connection $connexion): JsonResponse
+    public function cancelReservationUser($idReservation, Connection $connexion): JsonResponse
     {
         $query = "UPDATE *
             FROM reservations

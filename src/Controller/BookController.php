@@ -116,7 +116,6 @@ class BookController extends AbstractController
             "title" => $bookData["title"],
             "description" => $bookData["description"],
             "isbn" => $bookData["isbn"],
-            "isBorrowed" => $bookData["isBorrowed"],
             "cover" => $bookData["cover"],
             "publishedDate" => $bookData["publishedDate"],
             "originalLanguage" => $bookData["originalLanguage"],
