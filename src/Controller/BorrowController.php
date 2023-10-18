@@ -102,16 +102,22 @@ class BorrowController extends AbstractController
             $this->em = $doctrine->getManager();
             $borrow = new Borrow();
             $borrow = $this->setBorrow($req, $borrow);
-            $this->em->persist($borrow);
-            $this->em->flush();
+           
             //$this->setStatusBorrowed($req);
             $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
             $status = $this->em->getRepository(Status::class)->find(2);
             $book->setStatus($status);
-            $this->em->persist($book);
-            $this->em->flush();
-
-            return new JsonResponse(['message' => 'Borrow created successfully']);
+            if($book->getStatus()->getIdStatus()==2){
+                return new JsonResponse([]); 
+            }
+            else{
+                $this->em->persist($borrow);
+                $this->em->flush();
+                $this->em->persist($book);
+                $this->em->flush();
+                return new JsonResponse(['message' => 'Borrow created successfully']);
+            }
+            
         }
     }
 
