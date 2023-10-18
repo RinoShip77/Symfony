@@ -81,21 +81,21 @@ class UserController extends AbstractController
 		$action = $request->request->get('action');
 
 		switch ($action) {
-			case 'updateProfilePicture':
-				$uploadedFile = $request->files->get('profilePicture');
+			// case 'updateProfilePicture':
+			// 	$uploadedFile = $request->files->get('profilePicture');
 
-				if (strlen($uploadedFile) > 0) {
-					$newFilename = $user->getIdUser() . ".png";
+			// 	if (strlen($uploadedFile) > 0) {
+			// 		$newFilename = $user->getIdUser() . ".png";
 
-					if (Tools::deleteImage($this->imagesDirectory,  $newFilename)) {
-						try {
-							$uploadedFile->move($this->imagesDirectory, $newFilename);
-						} catch (FileException $e) {
-							return $this->json('File upload failed: ' . $e->getMessage(), 500);
-						}
-					}
-				}
-				break;
+			// 		if (Tools::deleteImage($this->imagesDirectory,  $newFilename)) {
+			// 			try {
+			// 				$uploadedFile->move($this->imagesDirectory, $newFilename);
+			// 			} catch (FileException $e) {
+			// 				return $this->json('File upload failed: ' . $e->getMessage(), 500);
+			// 			}
+			// 		}
+			// 	}
+			// 	break;
 
 			case 'updatePassword':
 				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
