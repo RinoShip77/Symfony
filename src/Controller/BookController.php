@@ -85,7 +85,6 @@ class BookController extends AbstractController
             $book["status"] = $status;
             $books[] = $book;
         }
-        var_dump($books);
         return $this->json($books);
     }
 
