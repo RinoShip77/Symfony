@@ -46,7 +46,6 @@ class BorrowController extends AbstractController
             "title" => $borrowData["title"],
             "description" => $borrowData["description"],
             "isbn" => $borrowData["isbn"],
-            "isBorrowed" => $borrowData["isBorrowed"],
             "cover" => $borrowData["cover"],
             "publishedDate" => $borrowData["publishedDate"],
             "originalLanguage" => $borrowData["originalLanguage"],

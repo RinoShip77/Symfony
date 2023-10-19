@@ -39,11 +39,6 @@ class RecommandationController extends AbstractController
     #[Route('/recommandation/{idUser}', name: 'app_recommandation')]
     public function index($idUser,ManagerRegistry $doctrine,Connection $connexion): JsonResponse
     {   
-        $encoders = [new XmlEncoder(), new JsonEncoder()];
-        $normalizers = [new ObjectNormalizer()];
-
-        $serializer = new Serializer($normalizers, $encoders);
-
         $this->em = $doctrine->getManager();
         $user = $this->em->getRepository(User::class)->find($idUser);
         $this->borrows = $this->em->getRepository(Borrow::class)->findBy(['user'=>$idUser]);
@@ -51,11 +46,14 @@ class RecommandationController extends AbstractController
         if(count($this->borrows)<=6){
             return $this->json([]);
         }
+
         $this->genres = $this->em->getRepository(Genre::class)->findAll();
         $this->amountGenres = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idGenre) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $this->amountAuthors = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
+
         $recommandedGenres = $this->RecommandedGenres();
         $recommandedAuthors= $this->RecommandedAuthors();
+
         $books=[];
         foreach($this->borrows as $borrow){
             array_push($books,$borrow->getBook());
@@ -103,6 +101,7 @@ class RecommandationController extends AbstractController
                ->distinct();
             array_push($recomandedBooks,...$qb->getQuery()->getResult());
         }
+        
         $jsonBook=[];
         $jsonResponse=[];
         foreach($recomandedBooks as $book){

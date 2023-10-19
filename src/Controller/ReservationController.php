@@ -169,7 +169,6 @@ class ReservationController extends AbstractController
                 "title" => $row["title"],
                 "isbn" => $row["isbn"],
                 "cover" => $row["cover"],
-                "isBorrowed" => $row["isBorrowed"],
                 "originalLanguage" => $row["originalLanguage"],
             ];
 
@@ -222,7 +221,6 @@ class ReservationController extends AbstractController
                 "idAuthor" => $row["idAuthor"],
                 "isbn" => $row["isbn"],
                 "title" => $row["title"],
-                "isBorrowed" => $row["isBorrowed"],
                 "description" => $row["description"],
                 "cover" => $row["cover"],
                 "originalLanguage" => $row["originalLanguage"],
