@@ -18,7 +18,9 @@ header('Access-Control-Allow-Origin: *');
 class UserController extends AbstractController
 {
 	private $em = null;
-	private $imagesDirectory = "./images/users/";
+	private $imagesDirectory = "images/users/templates/Picture";
+	private $imagesDestinationDirectory = "images/users/";
+	private $imagesExtension = ".png";
 
 	public function __construct(ManagerRegistry $doctrine)
 	{
@@ -81,21 +83,9 @@ class UserController extends AbstractController
 		$action = $request->request->get('action');
 
 		switch ($action) {
-			// case 'updateProfilePicture':
-			// 	$uploadedFile = $request->files->get('profilePicture');
-
-			// 	if (strlen($uploadedFile) > 0) {
-			// 		$newFilename = $user->getIdUser() . ".png";
-
-			// 		if (Tools::deleteImage($this->imagesDirectory,  $newFilename)) {
-			// 			try {
-			// 				$uploadedFile->move($this->imagesDirectory, $newFilename);
-			// 			} catch (FileException $e) {
-			// 				return $this->json('File upload failed: ' . $e->getMessage(), 500);
-			// 			}
-			// 		}
-			// 	}
-			// 	break;
+			case 'updateProfilePicture':
+				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
+				break;
 
 			case 'updatePassword':
 				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
