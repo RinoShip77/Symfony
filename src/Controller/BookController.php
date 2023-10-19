@@ -174,7 +174,7 @@ class BookController extends AbstractController
     #[Route('/update-book/{idBook}')]
     public function updateBook($idBook, Request $req, ManagerRegistry $doctrine): JsonResponse
     {
-
+        
         if ($req->getMethod() == 'POST') {
             
             $this->em = $doctrine->getManager();
@@ -189,14 +189,23 @@ class BookController extends AbstractController
             $this->em->persist($book);
             $this->em->flush();
 
+            
             // Gestion de l'image téléversée
             $uploadedFile = $req->files->get('cover');
+            
             // Si une image a été transmise
             if (strlen($uploadedFile) > 0) {
                 $newFilename = $book->getIdBook() . ".png";
                 
                 //Supprime l'image déjà existante avant d'en créer une nouvelle
                 if ($this->deleteImage($newFilename)) {
+                    try {
+                        $uploadedFile->move($this->imagesDirectory, $newFilename);
+                    } catch (FileException $e) {
+                        return new Response('File upload failed: ' . $e->getMessage(), 500);
+                    }
+                }
+                else {
                     try {
                         $uploadedFile->move($this->imagesDirectory, $newFilename);
                     } catch (FileException $e) {
@@ -251,14 +260,13 @@ class BookController extends AbstractController
     function deleteImage($filename)
     {
         $imagePath = $this->imagesDirectory . $filename;
-
+        
         if (file_exists($imagePath)) {
             // Supprime l'image
             unlink($imagePath);
 
             return true;
         }
-        throw $this->createNotFoundException('The image does not exist');
         return false;
     }
 }
