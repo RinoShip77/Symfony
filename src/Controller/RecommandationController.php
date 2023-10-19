@@ -101,7 +101,7 @@ class RecommandationController extends AbstractController
                ->distinct();
             array_push($recomandedBooks,...$qb->getQuery()->getResult());
         }
-        
+
         $jsonBook=[];
         $jsonResponse=[];
         foreach($recomandedBooks as $book){
@@ -109,6 +109,7 @@ class RecommandationController extends AbstractController
             $jsonBook['title']=$book->getTitle();
             $jsonBook['description']=$book->getDescription();
             $jsonBook['cover']=$book->getCover();
+            $jsonBook['isRecommended']=$book->getIsRecommended();
             $jsonResponse[]=$jsonBook;
 
         }
