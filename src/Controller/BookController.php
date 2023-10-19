@@ -98,6 +98,46 @@ class BookController extends AbstractController
         return $this->json($book);
     }
 
+    #[Route('/getBookBorrowed/{idBook}')]
+    public function getBookBorrowed($idBook, Request $request, Connection $connexion): JsonResponse
+    {
+
+        //$query = "SELECT * from books WHERE idBook=$idBook";
+
+        $query = "SELECT b.*, a.*, g.* 
+            FROM books b 
+            INNER JOIN authors a ON b.idAuthor = a.idAuthor 
+            INNER JOIN genres g ON b.idGenre = g.idGenre";
+
+        $bookData = $connexion->fetchAssociative($query);
+
+        $book = [
+            "idBook" => $bookData["idBook"],
+            "title" => $bookData["title"],
+            "description" => $bookData["description"],
+            "isbn" => $bookData["isbn"],
+            "cover" => $bookData["cover"],
+            "publishedDate" => $bookData["publishedDate"],
+            "originalLanguage" => $bookData["originalLanguage"],
+        ];
+
+        $author = [
+            "idAuthor" => $bookData["idAuthor"],
+            "firstName" => $bookData["firstName"],
+            "lastName" => $bookData["lastName"],
+        ];
+
+        $genre = [
+            "idGenre" => $bookData["idGenre"],
+            "name" => $bookData["name"],
+        ];
+        
+        $book["author"] = $author;
+        $book["genre"] = $genre;
+        
+        return $this->json($book);
+    }
+
     //--------------------------------
     // Créer un livre en base de données
     //--------------------------------

@@ -22,6 +22,41 @@ class BorrowController extends AbstractController
 {
     private $em = null;
 
+    #[Route('/borrows/borrow/{idBorrow}')]
+    public function getOne($idBorrow, Request $request, Connection $connexion)
+    {
+        $query = 
+        "SELECT * FROM borrows b
+        INNER JOIN books o ON b.idBook = o.idBook
+        WHERE idBorrow = $idBorrow";
+
+        $borrowData = $connexion->fetchAllAssociative($query)[0];
+
+        $borrow = [
+            "idBorrow" => $borrowData["idBorrow"],
+            "borrowedDate" => $borrowData["borrowedDate"],
+            "dueDate" => $borrowData["dueDate"],
+            "returnedDate" => $borrowData["returnedDate"],
+        ];
+
+        $book = [
+            "idBook" => $borrowData["idBook"],
+            "idGenre" => $borrowData["idGenre"],
+            "idAuthor" => $borrowData["idAuthor"],
+            "title" => $borrowData["title"],
+            "description" => $borrowData["description"],
+            "isbn" => $borrowData["isbn"],
+            "isBorrowed" => $borrowData["isBorrowed"],
+            "cover" => $borrowData["cover"],
+            "publishedDate" => $borrowData["publishedDate"],
+            "originalLanguage" => $borrowData["originalLanguage"],
+        ];
+
+        $borrow["book"] = $book;
+
+        return $this->json($borrow);
+    }
+
     //--------------------------------
     // Route to get all the borrows
     //--------------------------------
@@ -110,12 +145,80 @@ class BorrowController extends AbstractController
     #[Route('/borrows/{idUser}')]
     public function getBorrowsFromUser($idUser, Request $request, Connection $connexion): JsonResponse
     {
+        $borrowsData = $connexion->fetchAllAssociative("
+        SELECT * FROM borrows b
+        INNER JOIN books g ON b.idBook = g.idBook
+        WHERE idUser = $idUser 
+        AND returnedDate IS NULL
+        ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
+
+        return $this->json($borrows);
+    }
+
+    #[Route('/borrows/history/{idUser}')]
+    public function getBorrowsHistoryFromUser($idUser, Request $request, Connection $connexion): JsonResponse
+    {
         //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
-        $borrows = $connexion->fetchAllAssociative("
+        $borrowsData = $connexion->fetchAllAssociative("
         SELECT * FROM borrows b
         INNER JOIN books g ON b.idBook = g.idBook
         WHERE idUser = $idUser
+        AND returnedDate IS NOT NULL
         ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
 
         return $this->json($borrows);
     }
@@ -124,16 +227,98 @@ class BorrowController extends AbstractController
     public function getBorrowsOrderedBy($idUser, $order, Request $request, Connection $connexion): JsonResponse
     {
         //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
-        $borrows = $connexion->fetchAllAssociative("
+        $borrowsData = $connexion->fetchAllAssociative("
         SELECT * FROM borrows b
         INNER JOIN books g ON b.idBook = g.idBook
         WHERE idUser = $idUser
+        AND returnedDate IS NULL
         ORDER BY b.$order
         ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
 
         return $this->json($borrows);
     }
 
+    #[Route('/borrows/history/{idUser}/{order}')]
+    public function getBorrowsHistoryOrderedBy($idUser, $order, Request $request, Connection $connexion): JsonResponse
+    {
+        //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
+        $borrowsData = $connexion->fetchAllAssociative("
+        SELECT * FROM borrows b
+        INNER JOIN books g ON b.idBook = g.idBook
+        WHERE idUser = $idUser
+        AND returnedDate IS NOT NULL
+        ORDER BY b.$order
+        ");
+
+        $borrows = [];
+        foreach ($borrowsData as $row) {
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "idUser" => $row["idUser"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "isbn" => $row["isbn"],
+                "isBorrowed" => $row["isBorrowed"],
+                "cover" => $row["cover"],
+                "publishedDate" => $row["publishedDate"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $borrow["book"] = $book;
+            $borrows[] = $borrow;
+        }
+
+        return $this->json($borrows);
+    }
+
+    #[Route('renew/{idBorrow}')]
+    public function renouvellement($idBorrow, Request $request, Connection $connexion): JsonResponse
+    {
+        //$borrows = $connexion->fetcha("SELECT * FROM borrows WHERE idUser=$idUser");
+        $borrow = $connexion->executeStatement("
+        UPDATE borrows
+        SET dueDate = DATE_ADD(dueDate, INTERVAL 1 MONTH)
+        WHERE idBorrow = $idBorrow;
+        ");
+
+        return $this->json($borrow);
+    }
 
     //je vais repasser pour split la fonction en deux avec setStatusBorrowed
     #[Route('/create-Borrow')]
