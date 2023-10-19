@@ -25,17 +25,17 @@ class Author
     #[ORM\OneToMany(mappedBy: 'author', targetEntity:Book::class, orphanRemoval: true, cascade:['persist'])]
     private Collection $commandes;
 
-    // #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
-    // private Collection $books;
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
+     private Collection $books;
 
     public function __construct()
     {
-        $this->books = new ArrayCollection();
+      //  $this->books = new ArrayCollection();
     }
 
-    #[ORM\OneToMany(targetEntity:Book::class, mappedBy:"author", fetch:"LAZY")]
+    //#[ORM\OneToMany(targetEntity:Book::class, mappedBy:"author", fetch:"LAZY")]
     // La variable de la relation (Foreign Key)
-    private $books;
+    //private $books; 
 
     public function getIdAuthor(): ?int
     {
@@ -66,9 +66,9 @@ class Author
         return $this;
     }
 
-    public function getBooks() : Collection {
+ /*    public function getBooks() : Collection {
         return $this->books;
-    }
+    } */
 
     // /**
     //  * @return Collection<int, Book>

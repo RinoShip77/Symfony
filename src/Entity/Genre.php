@@ -22,17 +22,17 @@ class Genre
     #[ORM\Column(length: 50)]
     private ?string $icon = null;
 
-    // #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Book::class)]
-    // private Collection $books;
+     #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Book::class)]
+     private Collection $books;
 
     public function __construct()
     {
-        $this->books = new ArrayCollection();
+      //  $this->books = new ArrayCollection();
     }
 
-    #[ORM\OneToMany(targetEntity:Book::class, mappedBy:"genre", fetch:"LAZY")]
+    //#[ORM\OneToMany(targetEntity:Book::class, mappedBy:"genre", fetch:"LAZY")]
     // La variable de la relation (Foreign Key)
-    private $books;
+    //private $books;
 
     public function getIdGenre(): ?int
     {

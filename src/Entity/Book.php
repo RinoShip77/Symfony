@@ -57,13 +57,17 @@ class Book
     private Collection $favorites;
 
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
-    private Collection $reservations;
+    private Collection $reservations; 
+
+    #[ORM\Column(name: 'isRecommended')]
+    private ?bool $isRecommended = false;
+
 
     public function __construct()
     {
-        $this->evaluations = new ArrayCollection();
-        $this->favorites = new ArrayCollection();
-        $this->reservations = new ArrayCollection();
+        //$this->evaluations = new ArrayCollection();
+        //$this->favorites = new ArrayCollection();
+        //$this->reservations = new ArrayCollection();
     }
 
     public function getIdBook(): ?int
@@ -238,7 +242,7 @@ class Book
         return $this;
     }
     
-    /**
+     /*   
      * @return Collection<int, Favorite>
      */
     public function getFavorites(): Collection
@@ -268,7 +272,7 @@ class Book
         return $this;
     }
 
-    /**
+    /*
      * @return Collection<int, Reservation>
      */
     public function getReservations(): Collection
@@ -296,5 +300,6 @@ class Book
         }
 
         return $this;
-    }
+    } 
+
 }
