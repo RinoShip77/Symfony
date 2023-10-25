@@ -151,6 +151,7 @@ class ReservationController extends AbstractController
             $reservation = [
                 "idReservation" => $row["idReservation"],
                 "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"]
             ];
 
             $user = [
@@ -241,14 +242,25 @@ class ReservationController extends AbstractController
         return $this->json($reservations);
     }
 
-    #[Route('/reservations/cancel/{idReservation}/')]
-    public function cancelReservationUser($idReservation, Connection $connexion): JsonResponse
+    #[Route('/reservations-cancel/{idReservation}')]
+    public function cancelReservationUser($idReservation, Request $request, Connection $connexion): JsonResponse
     {
-        $query = "UPDATE *
-            FROM reservations
-            WHERE idReservation = $idReservation";
+        $reservation = $connexion->executeStatement("UPDATE reservations SET isActive = 0 WHERE idReservation = $idReservation");
 
-        $reservation = $connexion->executeStatement($query);
+        return $this->json($reservation);
+    }
+
+    #[Route('/reservations-reactivate/{idReservation}')]
+    public function reactivateReservationUser($idReservation, Request $request, Connection $connexion): JsonResponse
+    {
+        $reservation = $connexion->executeStatement("UPDATE reservations SET isActive = 1 WHERE idReservation = $idReservation");
+
+        $reservation = $connexion->executeStatement("
+        UPDATE reservations
+        SET reservationDate = NOW()
+        WHERE idReservation = $idReservation;
+        ");
+
         return $this->json($reservation);
     }
 }
