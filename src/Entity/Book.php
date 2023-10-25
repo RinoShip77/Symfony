@@ -32,7 +32,7 @@ class Book
     #[ORM\Column(length: 100)]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 2048)]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
