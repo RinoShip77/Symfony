@@ -11,9 +11,11 @@ use App\Entity\Borrow;
 use App\Entity\Book;
 use App\Entity\User;
 use App\Entity\Status;
+use Symfony\Component\HttpFoundation\Response;
 use App\Tools;
 use Doctrine\Persistence\ManagerRegistry;
 use DateTimeImmutable;
+use Error;
 
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
@@ -315,35 +317,41 @@ class BorrowController extends AbstractController
         return $this->json($borrow);
     }
 
+    //--------------------------------
+    //
+    //--------------------------------
     //je vais repasser pour split la fonction en deux avec setStatusBorrowed
-    #[Route('/create-Borrow')]
+    #[Route('/create-borrow')]
     public function createBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
     {
-
         if ($req->getMethod() == 'POST') {
 
             $this->em = $doctrine->getManager();
             $borrow = new Borrow();
             $borrow = $this->setBorrow($req, $borrow);
-           
-            //$this->setStatusBorrowed($req);
+
             $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
-            $status = $this->em->getRepository(Status::class)->find(2);
-            $book->setStatus($status);
-            if($book->getStatus()->getIdStatus()==2){
-                return new JsonResponse([]); 
-            }
-            else{
+            $statusEnable = $this->em->getRepository(Status::class)->find(1);
+            $statusBorrowed = $this->em->getRepository(Status::class)->find(2);
+
+            if ($book->getStatus() == $statusEnable) {
+                $book->setStatus($statusBorrowed);
+            
                 $this->em->persist($borrow);
-                $this->em->flush();
                 $this->em->persist($book);
                 $this->em->flush();
-                return new JsonResponse(['message' => 'Borrow created successfully']);
+                return new JsonResponse(['message' => 'Borrow created successfully'], 201);
             }
             
+
+            return new JsonResponse(['error' => 'Borrow already exists'], 409);
         }
+            
     }
 
+    //--------------------------------
+    //
+    //--------------------------------
     function setBorrow($req, $borrow)
     {
         $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
@@ -353,11 +361,10 @@ class BorrowController extends AbstractController
         $borrow->setBook($book);
 
         $borrow->setBorrowedDate(new \DateTime());
-        $borrow->setDueDate(new \DateTime('+1 week'));
+        $borrow->setDueDate(new \DateTime('+2 week'));
 
         return $borrow;
     }
-
 
     //dans la requete jai le id du livre, donc jenvoie la requete pis je change le status du livre que son id est dans la requete
     // function setStatusBorrowed($req,ManagerRegistry $doctrine){
@@ -377,13 +384,16 @@ class BorrowController extends AbstractController
 
             $borrow = $this->em->getRepository(Borrow::class)->find($idBorrow);
 
-
             if (!$borrow) {
                 return new JsonResponse(['error' => 'Borrow not found'], 404);
             }
 
-            $dateTime = new DateTimeImmutable();
-            $borrow->setReturnedDate($dateTime);
+            $borrow->setReturnedDate(new \DateTime());
+
+            $book = $this->em->getRepository(Book::class)->find($borrow->getBook()->getIdBook());
+            $status = $this->em->getRepository(Status::class)->find(1);
+            $book->setStatus($status);
+            $this->em->persist($book);
 
             $this->em->persist($borrow);
             $this->em->flush();

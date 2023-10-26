@@ -2,16 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Author;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Persistence\ManagerRegistry;
 
 header('Access-Control-Allow-Origin: *');
 
 class AuthorController extends AbstractController
 {
+    private $em = null;
+
     //--------------------------------
     // Route to get all the authors
     //--------------------------------
@@ -32,5 +36,27 @@ class AuthorController extends AbstractController
         $author = $connexion->fetchAssociative("SELECT * FROM authors WHERE idAuthor = $idAuthor");
         
         return $this->json($author);
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/create-author')]
+    public function createAuthor(Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+        
+        if ($req->getMethod() == 'POST') {
+            
+            $this->em = $doctrine->getManager();
+            $author = new Author();
+            
+            $author->setFirstName($req->request->get('firstName'));
+            $author->setLastName($req->request->get('lastName'));
+
+            $this->em->persist($author);
+            $this->em->flush();
+
+            return $this->json($author);
+        }
     }
 }
