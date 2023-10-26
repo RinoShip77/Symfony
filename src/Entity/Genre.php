@@ -19,9 +19,6 @@ class Genre
     #[ORM\Column(length: 30)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $icon = null;
-
      #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Book::class)]
      private Collection $books;
 
@@ -47,18 +44,6 @@ class Genre
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getIcon(): ?string
-    {
-        return $this->icon;
-    }
-
-    public function setIcon(string $icon): static
-    {
-        $this->icon = $icon;
 
         return $this;
     }
