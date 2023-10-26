@@ -30,28 +30,41 @@ class BookController extends AbstractController
     // Route to get all the books
     //--------------------------------
     #[Route('/books')]
-    public function getAllBooks(Request $request, Connection $connexion): JsonResponse
+    public function getBooks(Request $request, Connection $connexion): JsonResponse
     {
         $query = "SELECT b.*, a.*, g.*, s.* 
             FROM books b 
             INNER JOIN authors a ON b.idAuthor = a.idAuthor 
             INNER JOIN genres g ON b.idGenre = g.idGenre
             INNER JOIN status s ON b.idStatus = s.idStatus";
-
-        /*if ($idGenre && $search) {
-            $query .= " WHERE title LIKE '%$search%' AND idGenre IN($idGenre)";
-        }
-
-        if($idGenre && !$search) {
-            $query .= " WHERE idGenre IN($idGenre)";
-        }
-        
-        if(!$idGenre && $search) {
-            $query .= " WHERE title LIKE '%$search%'";
-        }*/
         
         $booksData = $connexion->fetchAllAssociative($query);
 
+        return $this->json($this->setBooks($booksData));
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/available-books')]
+    public function getAvailableBooks(Request $request, Connection $connexion): JsonResponse
+    {
+        $query = "SELECT b.*, a.*, g.*, s.* 
+            FROM books b 
+            INNER JOIN authors a ON b.idAuthor = a.idAuthor 
+            INNER JOIN genres g ON b.idGenre = g.idGenre
+            INNER JOIN status s ON b.idStatus = s.idStatus
+            WHERE s.status = 'Disponible'";
+        
+        $booksData = $connexion->fetchAllAssociative($query);
+
+        return $this->json($this->setBooks($booksData));
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    public function setBooks($booksData) {
         $books = [];
         foreach ($booksData as $row) {
             $book = [
@@ -85,7 +98,8 @@ class BookController extends AbstractController
             $book["status"] = $status;
             $books[] = $book;
         }
-        return $this->json($books);
+
+        return $books;
     }
 
     #[Route('/get-book/{idBook}')]
