@@ -113,7 +113,7 @@ class ReservationController extends AbstractController
         borrows bo ON r.idBook = bo.idBook
     LEFT JOIN
         users u2 ON bo.idUser = u2.idUser
-        WHERE bo.returnedDate IS NULL";
+    WHERE bo.returnedDate IS NULL AND r.reservationDate >= bo.borrowedDate ";
 
         $result = $connection->fetchAllAssociative($query);
 
