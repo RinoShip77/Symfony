@@ -112,4 +112,65 @@ class UserController extends AbstractController
 
 		return $this->json($user);
 	}
+
+	//--------------------------------
+	//
+	//--------------------------------
+	#[Route('/create-user')]
+	public function createBook(Request $req, ManagerRegistry $doctrine): JsonResponse
+	{
+		if ($req->getMethod() == 'POST') {
+
+			$this->em = $doctrine->getManager();
+			$user = new User();
+
+			$user->setMemberNumber($this->generateUniqueMemberNumber());
+			$user->setRegistrationDate(new \DateTime());
+			$user->setFirstName($req->request->get('firstName'));
+			$user->setLastName($req->request->get('lastName'));
+			$user->setEmail($req->request->get('email'));
+			$user->setAddress($req->request->get('address'));
+			$user->setPostalCode(strtoupper($req->request->get('postalCode')));
+			$user->setPhoneNumber(str_replace(['-', ' '], '', $req->request->get('phoneNumber')));
+			$user->setRoles(json_decode($req->request->get('roles')));
+			$user->setPassword($req->request->get('password'));
+
+			$this->em->persist($user);
+			$this->em->flush();
+
+
+
+			$userData = [
+				'idUser' => $user->getIdUser(),
+				'memberNumber' => $user->getMemberNumber(),
+				'registrationDate' => $user->getRegistrationDate(),
+				'firstName' => $user->getFirstName(),
+				'lastName' => $user->getLastName(),
+				'email' => $user->getEmail(),
+				'address' => $user->getAddress(),
+				'postalCode' => $user->getPostalCode(),
+				'phoneNumber' => $user->getPhoneNumber(),
+				'roles' => $user->getRoles(),
+			];
+	
+			return new JsonResponse($userData);
+		}
+	}
+
+	public function generateUniqueMemberNumber()
+    {
+        $unique = false;
+
+        while (!$unique) {
+            $memberNumber = mt_rand(10000000, 99999999);
+
+            $existingUser =  $this->em->getRepository(User::class)->findOneBy(['memberNumber' => $memberNumber]);
+
+            if (!$existingUser) {
+                $unique = true;
+            }
+        }
+
+        return $memberNumber;
+    }
 }
