@@ -23,7 +23,7 @@ class GenreController extends AbstractController
     #[Route('/genres')]
     public function getAll(Connection $connexion): JsonResponse
     {
-        $genres = $connexion->fetchAllAssociative("SELECT * FROM genres");
+        $genres = $connexion->fetchAllAssociative("SELECT * FROM genres ORDER BY name ASC");
 
         return $this->json($genres);
     }
