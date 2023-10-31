@@ -22,7 +22,7 @@
         "symfony/yaml": "6.3.*"
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.50"
+        "symfony/maker-bundle": "^1.51"
     },
     "config": {
         "allow-plugins": {

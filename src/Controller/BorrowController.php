@@ -394,11 +394,9 @@ class BorrowController extends AbstractController
             $status = $this->em->getRepository(Status::class)->find(1);
             $book->setStatus($status);
             $this->em->persist($book);
-
-            $this->em->persist($borrow);
             $this->em->flush();
 
-            return new JsonResponse(['message' => 'Borrow returned successfully']);
+            return $this->json($borrow);
         }
     }
 }
