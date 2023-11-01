@@ -91,7 +91,11 @@ class UserController extends AbstractController
 				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
 				break;
 
-			case 'desactivate':
+			case 'activateAccount':
+				$user->setRoles(['ROLE_USER']);
+				break;
+
+			case 'deactivateAccount':
 				$user->setRoles(['ROLE_DEACTIVATE']);
 				break;
 
@@ -152,25 +156,25 @@ class UserController extends AbstractController
 				'phoneNumber' => $user->getPhoneNumber(),
 				'roles' => $user->getRoles(),
 			];
-	
+
 			return new JsonResponse($userData);
 		}
 	}
 
 	public function generateUniqueMemberNumber()
-    {
-        $unique = false;
+	{
+		$unique = false;
 
-        while (!$unique) {
-            $memberNumber = mt_rand(10000000, 99999999);
+		while (!$unique) {
+			$memberNumber = mt_rand(10000000, 99999999);
 
-            $existingUser =  $this->em->getRepository(User::class)->findOneBy(['memberNumber' => $memberNumber]);
+			$existingUser =  $this->em->getRepository(User::class)->findOneBy(['memberNumber' => $memberNumber]);
 
-            if (!$existingUser) {
-                $unique = true;
-            }
-        }
+			if (!$existingUser) {
+				$unique = true;
+			}
+		}
 
-        return $memberNumber;
-    }
+		return $memberNumber;
+	}
 }

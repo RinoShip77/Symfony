@@ -75,6 +75,7 @@ class BookController extends AbstractController
                 "cover" => $row["cover"],
                 "publishedDate" => $row["publishedDate"],
                 "originalLanguage" => $row["originalLanguage"],
+                "isRecommended" => $row["isRecommended"],
             ];
 
             $author = [
@@ -133,6 +134,7 @@ class BookController extends AbstractController
             "cover" => $bookData["cover"],
             "publishedDate" => $bookData["publishedDate"],
             "originalLanguage" => $bookData["originalLanguage"],
+            "isRecommended" => $bookData["isRecommended"],
         ];
 
         $author = [
@@ -242,6 +244,7 @@ class BookController extends AbstractController
         
         $book->setPublishedDate(new \DateTime($req->request->get('publishedDate')));
         $book->setOriginalLanguage($req->request->get('originalLanguage'));
+        $book->setIsRecommended($req->request->get('isRecommended'));
         
         // Attribut inutile?
         //$book->setCover($req->request->get('cover'));
