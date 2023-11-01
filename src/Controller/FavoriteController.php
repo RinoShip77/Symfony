@@ -6,12 +6,20 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\Favorite;
+use App\Entity\User;
+use App\Entity\Book;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
 class FavoriteController extends AbstractController
 {
+
+    private $em = null;
     //--------------------------------
     // Route to get all the favorites
     //--------------------------------
@@ -50,5 +58,22 @@ class FavoriteController extends AbstractController
             $favorites[] = $favorite;
         }
         return $this->json($favorites);
+    }
+
+    #[route('/create-favorite')]
+    public function createFavorite(Request $req,ManagerRegistry $doctrine){
+        if($req->getMethod()=='POST'){
+            $this->em= $doctrine->getManager();
+            $user=$this->em->getRepository(User::class)->find($req->request->get('idUser'));
+            $book=$this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+            $favorite = new Favorite();
+            $favorite->setUser($user);
+            $favorite->setBook($book);
+            $favorite->setFavoriteDate(new \DateTime());
+            $this->em->persist($favorite);
+            $this->em->flush();
+            return new JsonResponse(['message' => 'Favoris crée avec succes'], 201);
+        }
+        
     }
 }
