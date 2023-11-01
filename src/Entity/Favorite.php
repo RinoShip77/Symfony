@@ -15,11 +15,11 @@ class Favorite
     #[ORM\Column(name: 'idFavorite')]
     private ?int $idFavorite = null;
 
-    #[ORM\ManyToOne(inversedBy: 'evaluations')]
+    #[ORM\ManyToOne(inversedBy: 'user')]
     #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
     private ?User $user = null;
     
-    #[ORM\ManyToOne(inversedBy: 'evaluations')]
+    #[ORM\ManyToOne(inversedBy: 'book')]
     #[ORM\JoinColumn(name: 'idBook', referencedColumnName: 'idBook', nullable: false)]
     private ?Book $book = null;
 
