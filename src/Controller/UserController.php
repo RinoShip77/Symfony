@@ -22,6 +22,9 @@ class UserController extends AbstractController
 	private $imagesDestinationDirectory = "images/users/";
 	private $imagesExtension = ".png";
 
+	//--------------------------------
+	// Function to initialize the controller
+	//--------------------------------
 	public function __construct(ManagerRegistry $doctrine)
 	{
 		$this->em = $doctrine->getManager();
@@ -76,14 +79,14 @@ class UserController extends AbstractController
 	//--------------------------------
 	// Connect a user to the application
 	//--------------------------------
-	#[Route('/user/{idUser}')]
+	#[Route('/users/{idUser}')]
 	public function updateProfile($idUser, Request $request): JsonResponse
 	{
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
 
 		switch ($action) {
-			case 'updateProfilePicture':
+			case 'updatePicture':
 				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
 				break;
 
@@ -97,10 +100,6 @@ class UserController extends AbstractController
 
 			case 'deactivateAccount':
 				$user->setRoles(['ROLE_DEACTIVATE']);
-				break;
-
-			case 'delete':
-				$this->em->getRepository(User::class)->remove($user, true);
 				break;
 
 			case 'updateInformations':
