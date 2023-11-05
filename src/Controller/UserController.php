@@ -85,32 +85,37 @@ class UserController extends AbstractController
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
 
-		switch ($action) {
-			case 'updatePicture':
-				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
-				break;
+		if (!$action) {
+			switch ($action) {
+				case 'updatePicture':
+					copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
+					break;
 
-			case 'updatePassword':
-				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
-				break;
+				case 'updatePassword':
+					$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
+					break;
 
-			case 'activateAccount':
-				$user->setRoles(['ROLE_USER']);
-				break;
+				case 'activateAccount':
+					$user->setRoles(['ROLE_USER']);
+					break;
 
-			case 'deactivateAccount':
-				$user->setRoles(['ROLE_DEACTIVATE']);
-				break;
+				case 'deactivateAccount':
+					$user->setRoles(['ROLE_DEACTIVATE']);
+					break;
 
-			case 'updateInformations':
-				$user->setEmail($request->request->get('email'));
-				$user->setFirstName($request->request->get('firstName'));
-				$user->setLastName($request->request->get('lastName'));
-				$user->setAddress($request->request->get('address'));
-				$user->setPostalCode($request->request->get('postalCode'));
-				$user->setPhoneNumber($request->request->get('phoneNumber'));
-				break;
+				case 'updateInformations':
+					$user->setEmail($request->request->get('email'));
+					$user->setFirstName($request->request->get('firstName'));
+					$user->setLastName($request->request->get('lastName'));
+					$user->setAddress($request->request->get('address'));
+					$user->setPostalCode($request->request->get('postalCode'));
+					$user->setPhoneNumber($request->request->get('phoneNumber'));
+					break;
+			}
+		} else {
+			return $this->json($user);
 		}
+		
 		$this->em->getRepository(User::class)->save($user, true);
 
 		return $this->json($user);
