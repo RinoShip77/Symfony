@@ -142,6 +142,7 @@ class UserController extends AbstractController
 			$user->setPhoneNumber(str_replace(['-', ' '], '', $req->request->get('phoneNumber')));
 			$user->setRoles(json_decode($req->request->get('roles')));
 			$user->setPassword($req->request->get('password'));
+			$user->setFees(0);
 
 			$this->em->persist($user);
 			$this->em->flush();
