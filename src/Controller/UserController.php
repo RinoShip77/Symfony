@@ -12,6 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Tools;
 
+
+use Stripe;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
 
@@ -62,6 +66,7 @@ class UserController extends AbstractController
 				$newUser['phoneNumber'] = $user[0]['phoneNumber'];
 				$newUser['postalCode'] = $user[0]['postalCode'];
 				$newUser['roles'] = $user[0]['roles'];
+				$newUser['fees'] = $user[0]['fees'];
 
 				return $this->json($newUser);
 			} else {
@@ -111,5 +116,38 @@ class UserController extends AbstractController
 		$this->em->getRepository(User::class)->save($user, true);
 
 		return $this->json($user);
+	}
+
+	//--------------------------------
+	// Route to get all the users
+	//--------------------------------
+	#[Route('/payFees/{idUser}')]
+	public function payFees($idUser, Request $request, Connection $connection)
+	{
+	
+		/*
+        //https:monDomaine.test/stripe-success?session_id={CHECKOUT_SESSION_ID}
+        $successURL = $this->generateUrl('stripe_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . "?stripe_id={CHECKOUT_SESSION_ID}";
+
+        $sessionData = [
+            'line_items' => [[
+                'quantity' => 1,
+                'price_data' => ['unit_amount' => $this->panier->getTotal() * 100, 'currency' => 'CAD', 'product_data' => ['name' => 'Osmose Parfums' ]]
+            ]],
+            'customer_email' => $user->getEmail(),
+            'payment_method_types' => ['card'],
+            'mode' => 'payment',
+            'success_url' => $successURL,
+            'cancel_url' => $this->generateUrl('stripe_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL)
+        ];
+
+        //Extension curl nécessaire 
+        $checkoutSession = \Stripe\Checkout\Session::create($sessionData);
+        return $this->redirect($checkoutSession->url, 303);
+		*/
+
+		$reservation = $connection->executeStatement("UPDATE users SET fees = 0 WHERE idUser = $idUser");
+
+        return $this->json($reservation);
 	}
 }
