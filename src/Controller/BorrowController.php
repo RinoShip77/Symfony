@@ -327,8 +327,7 @@ class BorrowController extends AbstractController
         if ($req->getMethod() == 'POST') {
 
             $this->em = $doctrine->getManager();
-            $borrow = new Borrow();
-            $borrow = $this->setBorrow($req, $borrow);
+            $borrow = $this->setBorrow($req);
 
             $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
             $statusEnable = $this->em->getRepository(Status::class)->find(1);
@@ -337,23 +336,26 @@ class BorrowController extends AbstractController
             if ($book->getStatus() == $statusEnable) {
                 $book->setStatus($statusBorrowed);
             
+                var_dump($borrow);
                 $this->em->persist($borrow);
+                $this->em->flush();
                 $this->em->persist($book);
                 $this->em->flush();
                 return new JsonResponse(['message' => 'Borrow created successfully'], 201);
             }
             
 
-            return new JsonResponse(['error' => 'Borrow already exists'], 409);
+            return new JsonResponse(['error' => 'cannot borrow'], 409);
         }
-            
+        return new JsonResponse([]);    
     }
 
     //--------------------------------
     //
     //--------------------------------
-    function setBorrow($req, $borrow)
+    function setBorrow($req)
     {
+        $borrow = new Borrow();
         $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
         $user = $this->em->getRepository(User::class)->find($req->request->get('idUser'));
 

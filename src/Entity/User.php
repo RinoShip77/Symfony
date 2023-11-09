@@ -395,8 +395,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     //         }
     //     }
 
-        return $this;
-    }
+   //     return $this;
+  //  }
 
     public function getFees(): ?int
     {
