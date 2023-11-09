@@ -90,6 +90,7 @@ class UserController extends AbstractController
 		$user = $this->em->getRepository(User::class)->find($idUser);
 		$action = $request->request->get('action');
 
+
 		switch ($action) {
 			case 'updatePicture':
 				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
@@ -116,7 +117,13 @@ class UserController extends AbstractController
 				$user->setPhoneNumber($request->request->get('phoneNumber'));
 				break;
 		}
-		$this->em->getRepository(User::class)->save($user, true);
+
+		if (!$action) {
+			return $this->json($user);
+		} else {
+			$this->em->getRepository(User::class)->save($user, true);
+		}
+
 
 		return $this->json($user);
 	}
@@ -142,6 +149,7 @@ class UserController extends AbstractController
 			$user->setPhoneNumber(str_replace(['-', ' '], '', $req->request->get('phoneNumber')));
 			$user->setRoles(json_decode($req->request->get('roles')));
 			$user->setPassword($req->request->get('password'));
+			$user->setFees(0);
 
 			$this->em->persist($user);
 			$this->em->flush();
