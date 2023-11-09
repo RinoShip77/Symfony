@@ -394,9 +394,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $reservation->setUser(null);
             }
         }
-
-   //     return $this;
-  //  }
+       
+      return $this;
+    }
 
     public function getFees(): ?int
     {
