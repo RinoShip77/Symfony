@@ -82,48 +82,61 @@ class UserController extends AbstractController
 	}
 
 	//--------------------------------
-	// Connect a user to the application
+	// Route to get one user
 	//--------------------------------
 	#[Route('/users/{idUser}')]
-	public function updateProfile($idUser, Request $request): JsonResponse
+	public function getOne($idUser, Connection $connexion): JsonResponse
 	{
-		$user = $this->em->getRepository(User::class)->find($idUser);
-		$action = $request->request->get('action');
+		$user = $connexion->fetchAssociative("SELECT * FROM users WHERE idUser = $idUser");
 
+		return $this->json($user);
+	}
+
+	//--------------------------------
+	// Route to modify the user
+	//--------------------------------
+	#[Route('/users/modify/{idUser}')]
+	public function updateProfile($idUser, Request $request, Connection $connexion): JsonResponse
+	{
+		$action = $request->request->get('action');
 
 		switch ($action) {
 			case 'updatePicture':
-				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $user->getIdUser() . $this->imagesExtension);
+				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
 				break;
 
 			case 'updatePassword':
-				$this->em->getRepository(User::class)->upgradePassword($user, $request->request->get('newPassword'));
+				$connexion->executeStatement("UPDATE users SET password = $request->request->get('newPassword') WHERE idUser = $idUser");
 				break;
 
 			case 'activateAccount':
-				$user->setRoles(['ROLE_USER']);
+				$connexion->executeStatement("UPDATE users SET roles = '[\"ROLE_USER\"]' WHERE idUser = $idUser");
 				break;
 
 			case 'deactivateAccount':
-				$user->setRoles(['ROLE_DEACTIVATE']);
+				$connexion->executeStatement("UPDATE users SET roles = '[\"ROLE_DEACTIVATE\"]' WHERE idUser = $idUser");
 				break;
 
 			case 'updateInformations':
-				$user->setEmail($request->request->get('email'));
-				$user->setFirstName($request->request->get('firstName'));
-				$user->setLastName($request->request->get('lastName'));
-				$user->setAddress($request->request->get('address'));
-				$user->setPostalCode($request->request->get('postalCode'));
-				$user->setPhoneNumber($request->request->get('phoneNumber'));
+				$email = strval($request->request->get('email'));
+				$firstName = strval($request->request->get('firstName'));
+				$lastName = strval($request->request->get('lastName'));
+				$address = strval($request->request->get('address'));
+				$postalCode = strval($request->request->get('postalCode'));
+				$phoneNumber = strval($request->request->get('phoneNumber'));
+
+				$user = $connexion->executeStatement("UPDATE users SET
+				email = \"$email\",
+				firstName = \"$firstName\",
+				lastName = \"$lastName\",
+				address = \"$address\",
+				postalCode = \"$postalCode\",
+				phoneNumber = \"$phoneNumber\"
+				WHERE idUser = $idUser");
 				break;
 		}
 
-		if (!$action) {
-			return $this->json($user);
-		} else {
-			$this->em->getRepository(User::class)->save($user, true);
-		}
-
+		$user = $connexion->fetchAssociative("SELECT * FROM users WHERE idUser = $idUser");
 
 		return $this->json($user);
 	}
@@ -196,7 +209,7 @@ class UserController extends AbstractController
 	#[Route('/payFees/{idUser}')]
 	public function payFees($idUser, Request $request, Connection $connection)
 	{
-	
+
 		/*
         //https:monDomaine.test/stripe-success?session_id={CHECKOUT_SESSION_ID}
         $successURL = $this->generateUrl('stripe_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . "?stripe_id={CHECKOUT_SESSION_ID}";
@@ -220,6 +233,6 @@ class UserController extends AbstractController
 
 		$reservation = $connection->executeStatement("UPDATE users SET fees = 0 WHERE idUser = $idUser");
 
-        return $this->json($reservation);
+		return $this->json($reservation);
 	}
 }
