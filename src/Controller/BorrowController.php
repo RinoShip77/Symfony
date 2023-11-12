@@ -336,7 +336,6 @@ class BorrowController extends AbstractController
             if ($book->getStatus() == $statusEnable) {
                 $book->setStatus($statusBorrowed);
             
-                var_dump($borrow);
                 $this->em->persist($borrow);
                 $this->em->flush();
                 $this->em->persist($book);
