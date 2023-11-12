@@ -19,6 +19,9 @@ class Comment
     #[ORM\Column(length: 500)]
     private ?string $content = null;
 
+    #[ORM\Column(name: 'isFixed')]
+    private ?int $isFixed = 0;
+
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
     private ?User $user = null;
@@ -36,6 +39,18 @@ class Comment
     public function setReason(string $reason): static
     {
         $this->reason = $reason;
+
+        return $this;
+    }
+
+    public function getIsFixed(): ?string
+    {
+        return $this->isFixed;
+    }
+
+    public function setIsFixed(string $isFixed): static
+    {
+        $this->isFixed = $isFixed;
 
         return $this;
     }
