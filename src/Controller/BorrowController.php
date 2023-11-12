@@ -335,21 +335,13 @@ class BorrowController extends AbstractController
 
             if ($book->getStatus() == $statusEnable) {
                 $book->setStatus($statusBorrowed);
-<<<<<<< Updated upstream
             
-=======
-        
->>>>>>> Stashed changes
                 $this->em->persist($borrow);
                 $this->em->flush();
                 $this->em->persist($book);
                 $this->em->flush();
-<<<<<<< Updated upstream
-                return new JsonResponse($borrow->getIdBorrow());
-=======
                 $jsonBorrow['idBorrow']=$borrow->getIdBorrow();
                 return new JsonResponse($jsonBorrow);
->>>>>>> Stashed changes
             }
             
 
