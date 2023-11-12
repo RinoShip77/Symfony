@@ -25,8 +25,35 @@ class CommentController extends AbstractController
     #[Route('/comments')]
     public function getAll(Connection $connexion): JsonResponse
     {
-        
-        return $this->json("");
+        $commentsData = $connexion->fetchAllAssociative("
+        SELECT * FROM comment c
+        INNER JOIN users u ON c.idUser = u.idUser
+        ");
+
+        $comments = [];
+        foreach ($commentsData as $row) {
+            $comment = [
+                "idComment" => $row["idComment"],
+                "reason" => $row["reason"],
+                "content" => $row["content"],
+                "isFixed" => $row["isFixed"]
+            ];
+
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "email" => $row["email"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+                "phoneNumber" => $row["phoneNumber"],
+            ];
+
+            $comment["user"] = $user;
+            $comments[] = $comment;
+        }
+
+        return $this->json($comments);
     }
 
     //--------------------------------
@@ -50,6 +77,17 @@ class CommentController extends AbstractController
         }
 
         return new JsonResponse(['message' => 'Erreur dans création de commentaire']);
+    }
+
+    //--------------------------------
+    // Route to create a comment
+    //--------------------------------
+    #[Route('/comment-fixed/{idComment}')]
+    public function commentFixed($idComment, Request $req, Connection $connexion, ManagerRegistry $doctrine): JsonResponse
+    {
+        $comment = $connexion->executeStatement("UPDATE comment SET isFixed = 1 WHERE idComment = $idComment");
+
+        return $this->json($comment);
     }
 
     function setComment($req, $comment) {
