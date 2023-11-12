@@ -76,4 +76,35 @@ class FavoriteController extends AbstractController
         }
         
     }
+
+    #[route('/getNbrFav/{idBook}')]
+    public function returnNbrFav($idBook,Request $req,ManagerRegistry $doctrine,Connection $connexion):JsonResponse{
+      $nbrLike = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idFavorite) FROM favorites Where idBook= $idBook");
+      $nbr = $nbrLike['COUNT(DISTINCT idFavorite)'];
+      return $this->json($nbr);
+
+    }
+
+
+    #[route('/getIfFav')]
+    public function getIfFav(Request $req,ManagerRegistry $doctrine,Connection $connexion){
+        $idBook =$req->request->get('idBook');
+        $idUser = $req->request->get('idUser');
+        $favorite = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idFavorite) FROM favorites  WHERE idUser = $idUser AND idBook=$idBook");
+        $nbr = $favorite['COUNT(DISTINCT idFavorite)'];
+        return $this->json($nbr);
+    }
+
+    #[route('/delFav')]
+    public function delFav(Request $req,ManagerRegistry $doctrine,Connection $connexion){
+        if($req->getMethod()=='POST'){
+            $idBook =$req->request->get('idBook');
+            $idUser = $req->request->get('idUser');
+            $favorite=$connexion->fetchAssociative("DELETE FROM favorites  WHERE idUser = $idUser AND idBook=$idBook");
+
+            return $this->json(1);
+
+        }
+        return $this->json(0);
+    }
 }
