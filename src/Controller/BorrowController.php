@@ -340,7 +340,7 @@ class BorrowController extends AbstractController
                 $this->em->flush();
                 $this->em->persist($book);
                 $this->em->flush();
-                return new JsonResponse(['message' => 'Borrow created successfully'], 201);
+                return new JsonResponse($borrow->getIdBorrow());
             }
             
 
