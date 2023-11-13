@@ -102,7 +102,21 @@ class UserController extends AbstractController
 
 		switch ($action) {
 			case 'updatePicture':
-				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
+				$uploadedFile = $request->files->get('profilePicture');
+
+				if (strlen($uploadedFile) > 0) {
+					$newFilename = $idUser . ".png";
+
+					if (Tools::deleteImage($this->imagesDestinationDirectory,  $newFilename)) {
+						try {
+							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
+						} catch (FileException $e) {
+							return $this->json('File upload failed: ' . $e->getMessage(), 500);
+						}
+					}
+				}
+
+				// copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
 				break;
 
 			case 'updatePassword':
