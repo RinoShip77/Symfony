@@ -114,12 +114,12 @@ class UserController extends AbstractController
 						} catch (FileException $e) {
 							return $this->json('File upload failed: ' . $e->getMessage(), 500);
 						}
-					}	else {
-							try {
-									$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
-							} catch (FileException $e) {
-									return $this->json('File upload failed: ' . $e->getMessage(), 500);
-							}
+					} else {
+						try {
+							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
+						} catch (FileException $e) {
+							return $this->json('File upload failed: ' . $e->getMessage(), 500);
+						}
 					}
 				}
 
