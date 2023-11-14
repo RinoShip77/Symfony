@@ -121,6 +121,8 @@ class UserController extends AbstractController
 							return $this->json('File upload failed: ' . $e->getMessage(), 500);
 						}
 					}
+					
+					$connexion->executeStatement("UPDATE users SET profilePicture = '$this->imagesDestinationDirectory$newFilename' WHERE idUser = $idUser");
 				}
 
 				// copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
