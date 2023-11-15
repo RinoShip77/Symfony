@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\BookRepository;
@@ -15,27 +17,96 @@ class Book
     #[ORM\Column(name: 'idBook')]
     private ?int $idBook = null;
 
-    #[ORM\Column(length: 30)]
+    #[ORM\ManyToOne(inversedBy: 'books')]
+    #[ORM\JoinColumn(name: 'idGenre', referencedColumnName: 'idGenre', nullable: false)]
+    private ?Genre $genre = null;
+
+    #[ORM\ManyToOne(inversedBy: 'books')]
+    #[ORM\JoinColumn(name: 'idAuthor', referencedColumnName: 'idAuthor', nullable: false)]
+    private ?Author $author = null;
+
+    #[ORM\ManyToOne(inversedBy: 'books')]
+    #[ORM\JoinColumn(name: 'idStatus', referencedColumnName: 'idStatus', nullable: false)]
+    private ?Status $status = null;
+    
+    #[ORM\Column(length: 100)]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 2048)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255)]
     private ?string $isbn = null;
 
-    #[ORM\Column]
-    private ?int $cover = null;
+    #[ORM\Column(length: 30)]
+    private ?string $cover = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'publishDate')]
-    private ?\DateTimeInterface $publishDate = null;
+    #[ORM\Column(name: 'publishedDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $publishedDate = null;
 
     #[ORM\Column(length: 255, name: 'originalLanguage')]
     private ?string $originalLanguage = null;
 
+    #[ORM\Column(name: 'isRecommended')]
+    private bool $isRecommended = false;
+
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
+    private Collection $evaluations;
+    
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
+    private Collection $favorites;
+
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
+    private Collection $reservations; 
+
+
+
+    public function __construct()
+    {
+        //$this->evaluations = new ArrayCollection();
+        //$this->favorites = new ArrayCollection();
+        //$this->reservations = new ArrayCollection();
+    }
+
     public function getIdBook(): ?int
     {
         return $this->idBook;
+    }    
+
+    public function getGenre(): ?Genre
+    {
+        return $this->genre;
+    }
+
+    public function setGenre(Genre $genre): self
+    {
+        $this->genre = $genre;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(Author $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(Status $status): self
+    {
+        $this->status = $status;
+
+        return $this;
     }
 
     public function getTitle(): ?string
@@ -74,26 +145,43 @@ class Book
         return $this;
     }
 
-    public function getCover(): ?int
+    /*public function getBorrow(): ?Borrow
+    {
+        return $this->borrow;
+    }
+
+    public function setBorrow(Borrow $borrow): static
+    {
+        // set the owning side of the relation if necessary
+        if ($borrow->getBook() !== $this) {
+            $borrow->setBook($this);
+        }
+
+        $this->borrow = $borrow;
+
+        return $this;
+    }*/
+
+    public function getCover(): ?string
     {
         return $this->cover;
     }
 
-    public function setCover(int $cover): static
+    public function setCover(string $cover): static
     {
         $this->cover = $cover;
 
         return $this;
     }
 
-    public function getPublishDate(): ?\DateTimeInterface
+    public function getPublishedDate(): ?\DateTimeInterface
     {
-        return $this->publishDate;
+        return $this->publishedDate;
     }
 
-    public function setPublishDate(\DateTimeInterface $publishDate): static
+    public function setPublishedDate(\DateTimeInterface $publishedDate): static
     {
-        $this->publishDate = $publishDate;
+        $this->publishedDate = $publishedDate;
 
         return $this;
     }
@@ -109,4 +197,107 @@ class Book
 
         return $this;
     }
+
+    public function getIsRecommended(): ?bool
+    {
+        return $this->isRecommended;
+    }
+
+    public function setIsRecommended(bool $isRecommended): static
+    {
+        $this->isRecommended = $isRecommended;
+
+        return $this;
+    } 
+
+    /**
+     * @return Collection<int, Evaluation>
+     */
+    public function getEvaluations(): Collection
+    {
+        return $this->evaluations;
+    }
+
+    public function addEvaluation(Evaluation $evaluation): static
+    {
+        if (!$this->evaluations->contains($evaluation)) {
+            $this->evaluations->add($evaluation);
+            $evaluation->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvaluation(Evaluation $evaluation): static
+    {
+        if ($this->evaluations->removeElement($evaluation)) {
+            // set the owning side to null (unless already changed)
+            if ($evaluation->getBook() === $this) {
+                $evaluation->setBook(null);
+            }
+        }
+
+        return $this;
+    }
+    
+     /*   
+     * @return Collection<int, Favorite>
+     */
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
+    }
+
+    public function addFavorite(Favorite $favorite): static
+    {
+        if (!$this->favorites->contains($favorite)) {
+            $this->favorites->add($favorite);
+            $favorite->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavorite(Favorite $favorite): static
+    {
+        if ($this->favorites->removeElement($favorite)) {
+            // set the owning side to null (unless already changed)
+            if ($favorite->getBook() === $this) {
+                $favorite->setBook(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /*
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getBook() === $this) {
+                $reservation->setBook(null);
+            }
+        }
+
+        return $this;
+    } 
+
 }
