@@ -102,7 +102,28 @@ class UserController extends AbstractController
 
 		switch ($action) {
 			case 'updatePicture':
-				copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
+				$uploadedFile = $request->files->get('profilePicture');
+
+				if (strlen($uploadedFile) > 0) {
+					$newFilename = $idUser . ".png";
+
+					//Delete the previous image
+					if ($this->deleteImage($newFilename)) {
+						try {
+							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
+						} catch (FileException $e) {
+							return $this->json('File upload failed: ' . $e->getMessage(), 500);
+						}
+					} else {
+						try {
+							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
+						} catch (FileException $e) {
+							return $this->json('File upload failed: ' . $e->getMessage(), 500);
+						}
+					}
+				}
+
+				// copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
 				break;
 
 			case 'updatePassword':
@@ -234,5 +255,18 @@ class UserController extends AbstractController
 		$reservation = $connection->executeStatement("UPDATE users SET fees = 0 WHERE idUser = $idUser");
 
 		return $this->json($reservation);
+	}
+
+	function deleteImage($filename)
+	{
+		$imagePath = $this->imagesDirectory . $filename;
+
+		if (file_exists($imagePath)) {
+			// Supprime l'image
+			unlink($imagePath);
+
+			return true;
+		}
+		return false;
 	}
 }
