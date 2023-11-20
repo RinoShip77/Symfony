@@ -18,4 +18,14 @@ class StatusController extends AbstractController
 
         return $this->json($status);
     }
+
+    //--------------------------------
+    // Route to get the number of books of a status
+    //--------------------------------
+    #[Route('/status/books/{idStatus}')]
+    public function getNumberOfBooks($idStatus, Connection $connexion): JsonResponse
+    {
+        $number = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idBook) FROM books Where idStatus = $idStatus");
+        return $this->json($number['COUNT(DISTINCT idBook)']);
+    }
 }

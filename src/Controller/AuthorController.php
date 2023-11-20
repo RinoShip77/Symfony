@@ -59,4 +59,14 @@ class AuthorController extends AbstractController
             return $this->json($author);
         }
     }
+
+    //--------------------------------
+    // Route to get the number of books of an author
+    //--------------------------------
+    #[Route('/author/books/{idAuthor}')]
+    public function getNumberOfBooks($idAuthor, Connection $connexion): JsonResponse
+    {
+        $number = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idBook) FROM books Where idAuthor = $idAuthor");
+        return $this->json($number['COUNT(DISTINCT idBook)']);
+    }
 }

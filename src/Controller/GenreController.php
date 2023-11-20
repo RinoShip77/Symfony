@@ -45,25 +45,35 @@ class GenreController extends AbstractController
     #[Route('/create-genre')]
     public function createGenre(Request $req, ManagerRegistry $doctrine): JsonResponse
     {
-        
+
         if ($req->getMethod() == 'POST') {
-            
+
             $this->em = $doctrine->getManager();
             $genre = new Genre();
 
-            
-            
+
+
             $genre->setName($req->request->get('name'));
-            
+
             try {
                 $this->em->persist($genre);
-            $this->em->flush();
+                $this->em->flush();
             } catch (\Throwable $th) {
                 Tools::logmsg($th);
             }
-            
-            
+
+
             return $this->json($genre);
         }
+    }
+
+    //--------------------------------
+    // Route to get the number of books in one genre
+    //--------------------------------
+    #[Route('/genre/books/{idGenre}')]
+    public function getNumberOfBooks($idGenre, Connection $connexion): JsonResponse
+    {
+        $number = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idBook) FROM books Where idGenre = $idGenre");
+        return $this->json($number['COUNT(DISTINCT idBook)']);
     }
 }
