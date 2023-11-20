@@ -22,8 +22,8 @@ header('Access-Control-Allow-Origin: *');
 class UserController extends AbstractController
 {
 	private $em = null;
-	private $imagesDirectory = "images/users/templates/Picture";
-	private $imagesDestinationDirectory = "images/users/";
+	private $imagesTemplateDirectory = "images/users/templates/Picture";
+	private $imagesDirectory = "images/users/";
 	private $imagesExtension = ".png";
 
 	//--------------------------------
@@ -105,25 +105,17 @@ class UserController extends AbstractController
 				$uploadedFile = $request->files->get('profilePicture');
 
 				if (strlen($uploadedFile) > 0) {
-					$newFilename = $idUser . ".png";
+					$newFilename = $idUser . "_" . $request->request->get('timestamp') . ".png";
 
-					//Delete the previous image
-					if ($this->deleteImage($newFilename)) {
-						try {
-							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
-						} catch (FileException $e) {
-							return $this->json('File upload failed: ' . $e->getMessage(), 500);
-						}
-					} else {
-						try {
-							$uploadedFile->move($this->imagesDestinationDirectory, $newFilename);
-						} catch (FileException $e) {
-							return $this->json('File upload failed: ' . $e->getMessage(), 500);
-						}
+					try {
+						$uploadedFile->move($this->imagesDirectory, $newFilename);
+						$connexion->executeStatement("UPDATE users SET profilePicture = '$newFilename' WHERE idUser = $idUser");
+					} catch (FileException $e) {
+						return $this->json('File upload failed: ' . $e->getMessage(), 500);
 					}
 				}
 
-				// copy($this->imagesDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDestinationDirectory . $idUser . $this->imagesExtension);
+				// copy($this->imagesTemplateDirectory . $request->request->get('pictureNumber') . $this->imagesExtension, $this->imagesDirectory . $idUser . $this->imagesExtension);
 				break;
 
 			case 'updatePassword':
@@ -255,18 +247,5 @@ class UserController extends AbstractController
 		$reservation = $connection->executeStatement("UPDATE users SET fees = 0 WHERE idUser = $idUser");
 
 		return $this->json($reservation);
-	}
-
-	function deleteImage($filename)
-	{
-		$imagePath = $this->imagesDirectory . $filename;
-
-		if (file_exists($imagePath)) {
-			// Supprime l'image
-			unlink($imagePath);
-
-			return true;
-		}
-		return false;
 	}
 }
