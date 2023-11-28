@@ -340,4 +340,27 @@ class ReservationController extends AbstractController
         }
         return new JsonResponse(['error' => 'cannot reserve'], 409);
     }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/reservation/{idUser}/{idBook}')]
+    public function getOneReservationFromUser($idUser, $idBook, Connection $connexion): JsonResponse
+    {
+        $query = "SELECT idReservation
+            FROM reservations r 
+            INNER JOIN users u ON r.idUser = u.idUser 
+            INNER JOIN books b ON r.idBook = b.idBook
+            WHERE r.idUser = $idUser
+            AND r.idBook = $idBook
+            AND r.isActive";
+
+        $reservationsData = $connexion->fetchAllAssociative($query);
+
+        if (count($reservationsData) > 0) {
+            return $this->json(true);
+        }
+
+        return $this->json(false);
+    }
 }

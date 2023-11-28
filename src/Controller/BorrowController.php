@@ -403,4 +403,27 @@ class BorrowController extends AbstractController
             return new JsonResponse(['message' => 'Borrow returned successfully']);
         }
     }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/borrow/{idUser}/{idBook}')]
+    public function getOneBorrowFromUser($idUser, $idBook, Connection $connexion): JsonResponse
+    {
+        $query = "SELECT idBorrow
+            FROM borrows bo 
+            INNER JOIN users u ON bo.idUser = u.idUser 
+            INNER JOIN books b ON bo.idBook = b.idBook
+            WHERE bo.idUser = $idUser
+            AND bo.idBook = $idBook
+            AND bo.returnedDate IS NULL";
+
+        $borrowsData = $connexion->fetchAllAssociative($query);
+
+        if (count($borrowsData) > 0) {
+            return $this->json(true);
+        }
+
+        return $this->json(false);
+    }
 }
