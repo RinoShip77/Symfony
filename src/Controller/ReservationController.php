@@ -3,12 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Reservation;
+use App\Tools;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\Book;
+use App\Entity\User;
 
 ini_set('date.timezone', 'America/New_York');
 header('Access-Control-Allow-Origin: *');
@@ -65,6 +68,79 @@ class ReservationController extends AbstractController
     }
 
     //--------------------------------
+    // Route to get all the reservations
+    //--------------------------------
+    #[Route('/admin-reservations')]
+    public function getAllForAdmin(Connection $connexion): JsonResponse
+    {
+        $query = "SELECT
+        r.*,
+        u.idUser AS userId,
+        u.memberNumber AS userMemberNumber,
+        u.firstName, u.lastName, u.roles,
+        b.idBook AS bookId,
+        b.idGenre, b.idAuthor, b.title, b.description, b.cover, b.isbn, b.originalLanguage,   
+        bo.*,
+        bo.dueDate AS borrowDueDate,
+        u2.memberNumber AS borrowMemberNumber
+        FROM reservations r
+        INNER JOIN users u ON r.idUser = u.idUser
+        INNER JOIN books b ON r.idBook = b.idBook
+        LEFT JOIN (
+            SELECT idBook, MAX(idBorrow) AS maxBorrowID
+            FROM borrows
+            GROUP BY idBook
+        ) maxBorrow ON r.idBook = maxBorrow.idBook
+        LEFT JOIN borrows bo ON maxBorrow.maxBorrowID = bo.idBorrow
+        LEFT JOIN users u2 ON bo.idUser = u2.idUser;";
+
+
+        $reservationsData = $connexion->fetchAllAssociative($query);
+
+        $reservations = [];
+        foreach ($reservationsData as $row) {
+            $reservation = [
+                "idReservation" => $row["idReservation"],
+                "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"],
+                "borrowMemberNumber" => $row["borrowMemberNumber"],
+                "borrowDueDate" => $row["borrowDueDate"],
+            ];
+
+            $user = [
+                "idUser" => $row["userId"],
+                "memberNumber" => $row["userMemberNumber"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+            ];
+    
+            $book = [
+                "idBook" => $row["bookId"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "cover" => $row["cover"],
+                "isbn" => $row["isbn"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+            $borrow = [
+                "idBorrow" => $row["idBorrow"],
+                "borrowedDate" => $row["borrowedDate"],
+                "dueDate" => $row["dueDate"],
+                "returnedDate" => $row["returnedDate"],
+            ];
+
+            $reservation["user"] = $user;
+            $reservation["book"] = $book;
+            $reservation["borrow"] = $borrow;
+            $reservations[] = $reservation;
+        }
+        return $this->json($reservations);
+    }
+
+    //--------------------------------
     //
     //--------------------------------
     #[Route('/cancel-reservation/{idReservation}')]
@@ -89,35 +165,6 @@ class ReservationController extends AbstractController
 
             return new JsonResponse(['message' => 'Reservation canceled successfully']);
         }
-    }
-
-    //--------------------------------
-    //
-    //--------------------------------
-    #[Route('/reservations-data')]
-    public function getReservationsData(Connection $connection)
-    {
-        $query = "SELECT
-        r.idReservation,
-        r.idUser AS reservationIdUser,
-        u1.memberNumber AS reservationMemberNumber,
-        bo.idUser AS borrowIdUser,
-        u2.memberNumber AS borrowMemberNumber,
-        bo.dueDate,
-        bo.idBorrow
-    FROM
-        reservations r
-    JOIN
-        users u1 ON r.idUser = u1.idUser
-    LEFT JOIN
-        borrows bo ON r.idBook = bo.idBook
-    LEFT JOIN
-        users u2 ON bo.idUser = u2.idUser
-    WHERE bo.returnedDate IS NULL AND r.reservationDate >= bo.borrowedDate ";
-
-        $result = $connection->fetchAllAssociative($query);
-
-        return new JsonResponse($result);
     }
 
     #[Route('/reservations/book/{idBook}')]
@@ -187,7 +234,7 @@ class ReservationController extends AbstractController
         }
         return $this->json($reservations);
     }
-    
+
     #[Route('/reservations/{idUser}/{order}')]
     public function getReservationsOrderedBy($idUser, $order, Connection $connexion): JsonResponse
     {
@@ -262,5 +309,35 @@ class ReservationController extends AbstractController
         ");
 
         return $this->json($reservation);
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/create-reservation')]
+    public function createBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+        if ($req->getMethod() == 'POST') {
+
+            $this->em = $doctrine->getManager();
+            $reservation = new Reservation();
+            $book = $this->em->getRepository(Book::class)->find($req->request->get('idBook'));
+            $user = $this->em->getRepository(User::class)->find($req->request->get('idUser'));
+
+            $reservation->setUser($user);
+            $reservation->setBook($book);
+
+
+            $reservation->setReservationDate(new \DateTime());
+            $reservation->setIsActive(true);
+
+            $this->em->persist($reservation);
+            $this->em->flush();
+            $this->em->persist($book);
+            $this->em->flush();
+
+            return new JsonResponse(["Reservation created successfully"]);
+        }
+        return new JsonResponse(['error' => 'cannot reserve'], 409);
     }
 }
