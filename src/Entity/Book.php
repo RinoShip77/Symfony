@@ -50,6 +50,9 @@ class Book
     #[ORM\Column(name: 'isRecommended')]
     private bool $isRecommended = false;
 
+    #[ORM\Column(name: 'addedDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $addedDate = null;
+
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Evaluation::class)]
     private Collection $evaluations;
     
@@ -209,6 +212,18 @@ class Book
 
         return $this;
     } 
+
+    public function getAddedDate(): ?\DateTimeInterface
+    {
+        return $this->addedDate;
+    }
+
+    public function setAddedDate(\DateTimeInterface $addedDate): static
+    {
+        $this->addedDate = $addedDate;
+
+        return $this;
+    }
 
     /**
      * @return Collection<int, Evaluation>
