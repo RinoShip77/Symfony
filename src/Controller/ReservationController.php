@@ -315,7 +315,7 @@ class ReservationController extends AbstractController
     //
     //--------------------------------
     #[Route('/create-reservation')]
-    public function createBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
+    public function createReservation(Request $req, ManagerRegistry $doctrine): JsonResponse
     {
         if ($req->getMethod() == 'POST') {
 
@@ -362,5 +362,54 @@ class ReservationController extends AbstractController
         }
 
         return $this->json(false);
+    }
+
+    //--------------------------------
+    //
+    //--------------------------------
+    #[Route('/book-reservations/{idBook}')]
+    public function getBookReservations($idBook, Connection $connexion): JsonResponse
+    {
+        $query = "SELECT r.*, u.*, b.* 
+            FROM reservations r 
+            INNER JOIN users u ON r.idUser = u.idUser 
+            INNER JOIN books b ON r.idBook = b.idBook
+            WHERE r.idBook = $idBook
+            AND r.isActive";
+
+        $reservationsData = $connexion->fetchAllAssociative($query);
+
+        $reservations = [];
+        foreach ($reservationsData as $row) {
+            $reservation = [
+                "idReservation" => $row["idReservation"],
+                "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"],
+            ];
+
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+            ];
+
+            $book = [
+                "idBook" => $row["idBook"],
+                "idGenre" => $row["idGenre"],
+                "idAuthor" => $row["idAuthor"],
+                "title" => $row["title"],
+                "description" => $row["description"],
+                "cover" => $row["cover"],
+                "isbn" => $row["isbn"],
+                "originalLanguage" => $row["originalLanguage"],
+            ];
+
+            $reservation["user"] = $user;
+            $reservation["book"] = $book;
+            $reservations[] = $reservation;
+        }
+        return $this->json($reservations);
     }
 }
