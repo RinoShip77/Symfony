@@ -167,6 +167,7 @@ class BookController extends AbstractController
             $this->em = $doctrine->getManager();
             $book = new Book();
             $this->setBook($req, $book);
+            $book->setAddedDate(new \DateTime());
 
             $this->em->persist($book);
             $this->em->flush();
@@ -246,7 +247,6 @@ class BookController extends AbstractController
         $book->setPublishedDate(new \DateTime($req->request->get('publishedDate')));
         $book->setOriginalLanguage($req->request->get('originalLanguage'));
         $book->setIsRecommended($req->request->get('isRecommended'));
-        $book->setAddedDate(new \DateTime());
         
         // Attribut inutile?
         //$book->setCover($req->request->get('cover'));
