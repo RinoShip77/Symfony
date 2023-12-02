@@ -72,13 +72,9 @@ class UserController extends AbstractController
 				$newUser['fees'] = $user[0]['fees'];
 
 				return $this->json($newUser);
-			} else {
-				return $this->json("erreur 112");
 			}
-		} else {
-			return $this->json("erreur 117");
 		}
-		return $this->json($user);
+		return new JsonResponse(['error' => 'Bad credentials'], 400);
 	}
 
 	//--------------------------------
