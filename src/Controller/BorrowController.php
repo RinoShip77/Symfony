@@ -313,6 +313,7 @@ class BorrowController extends AbstractController
         SET dueDate = DATE_ADD(dueDate, INTERVAL 1 MONTH)
         WHERE idBorrow = $idBorrow;
         ");
+        
 
         return $this->json($borrow);
     }
@@ -395,6 +396,41 @@ class BorrowController extends AbstractController
             $book = $this->em->getRepository(Book::class)->find($borrow->getBook()->getIdBook());
             $status = $this->em->getRepository(Status::class)->find(1);
             $book->setStatus($status);
+            $this->em->persist($book);
+
+            $this->em->persist($borrow);
+            $this->em->flush();
+
+            return new JsonResponse(['message' => 'Borrow returned successfully']);
+        }
+    }
+
+    #[Route('/return-late-borrow')]
+    public function returnLateBorrow(Request $req, ManagerRegistry $doctrine): JsonResponse
+    {
+
+
+        if ($req->getMethod() == 'POST') {
+            $this->em = $doctrine->getManager();
+
+            $idBorrow = $req->request->get('idBorrow');
+            $borrow = $this->em->getRepository(Borrow::class)->find($idBorrow);
+
+            if (!$borrow) {
+                return new JsonResponse(['error' => 'Borrow not found'], 404);
+            }
+
+            $fees = $req->request->get('fees');
+
+            $borrow->setReturnedDate(new \DateTime());
+            $book = $this->em->getRepository(Book::class)->find($borrow->getBook()->getIdBook());
+            $user = $this->em->getRepository(User::class)->find($borrow->getUser()->getIdUser());
+            $status = $this->em->getRepository(Status::class)->find(1);
+
+            $book->setStatus($status);
+            $userFees = $user->getFees() + $fees;
+            $user->setFees($userFees);
+
             $this->em->persist($book);
 
             $this->em->persist($borrow);

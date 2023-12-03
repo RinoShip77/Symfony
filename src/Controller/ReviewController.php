@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Book;
 use App\Entity\Review;
 use App\Entity\User;
 use Doctrine\DBAL\Connection;
@@ -22,12 +23,14 @@ class ReviewController extends AbstractController
     //--------------------------------
     // Route to get all the comments
     //--------------------------------
-    #[Route('/reviews')]
-    public function getAll(Connection $connexion): JsonResponse
+    #[Route('/reviews/{idBook}')]
+    public function getAll($idBook, Connection $connexion): JsonResponse
     {
         $reviewsData = $connexion->fetchAllAssociative("
         SELECT * FROM reviews r
         INNER JOIN users u ON r.idUser = u.idUser
+        WHERE idBook = $idBook
+        ORDER BY reviewDate DESC
         ");
 
         $reviews = [];
@@ -35,7 +38,8 @@ class ReviewController extends AbstractController
             $review = [
                 "idReview" => $row["idReview"],
                 "message" => $row["message"],
-                "rating" => $row["rating"]
+                "rating" => $row["rating"],
+                "reviewDate" => $row["reviewDate"]
             ];
 
             $user = [
@@ -79,14 +83,18 @@ class ReviewController extends AbstractController
         return new JsonResponse(['message' => 'Erreur dans création de lévaluation']);
     }
 
-    function setReview($req, $comment) {
-        $comment->setMessage($req->request->get('message'));
-        $comment->setRating($req->request->get('rating'));
-        
+    function setReview($req, $review) {
+        $review->setMessage($req->request->get('message'));
+        $review->setRating($req->request->get('rating'));
+        $review->setReviewDate(new \DateTime());
         
         $idUser = $req->request->get('idUser');
         $user = $this->em->getRepository(User::class)->find($idUser);
-        $comment->setUser($user);
+        $review->setUser($user);
+
+        $idBook = $req->request->get('idBook');
+        $book = $this->em->getRepository(Book::class)->find($idBook);
+        $review->setBook($book);
         
     }
 }

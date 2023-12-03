@@ -59,7 +59,8 @@ class Book
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Reservation::class)]
     private Collection $reservations; 
 
-
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Review::class)]
+    private Collection $reviews;
 
     public function __construct()
     {
@@ -300,4 +301,21 @@ class Book
         return $this;
     } 
 
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setBook($this);
+        }
+
+        return $this;
+    }
 }

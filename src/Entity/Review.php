@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ReviewRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
@@ -20,9 +21,16 @@ class Review
     #[ORM\Column()]
     private ?int $rating = null;
 
+    #[ORM\Column(name: 'reviewDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $reviewDate = null;
+
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
     private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'reviews')]
+    #[ORM\JoinColumn(name: 'idBook', referencedColumnName: 'idBook', nullable: false)]
+    private ?Book $book = null;
 
     public function getIdReview(): ?int
     {
@@ -53,6 +61,18 @@ class Review
         return $this;
     }
 
+    public function getReviewDate(): ?\DateTimeInterface
+    {
+        return $this->reviewDate;
+    }
+
+    public function setReviewDate(\DateTimeInterface $reviewDate): static
+    {
+        $this->reviewDate = $reviewDate;
+
+        return $this;
+    }
+
     public function getUser(): ?User
     {
         return $this->user;
@@ -61,6 +81,18 @@ class Review
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getBook(): ?Book
+    {
+        return $this->book;
+    }
+
+    public function setBook(?Book $book): static
+    {
+        $this->book = $book;
 
         return $this;
     }
