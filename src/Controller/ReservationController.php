@@ -206,6 +206,7 @@ class ReservationController extends AbstractController
             $reservation = [
                 "idReservation" => $row["idReservation"],
                 "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"]
             ];
 
             $user = [
