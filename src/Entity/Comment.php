@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CommentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
@@ -21,6 +22,12 @@ class Comment
 
     #[ORM\Column(name: 'isFixed')]
     private ?int $isFixed = 0;
+
+    #[ORM\Column(name: 'createdDate', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdDate = null;
+
+    #[ORM\Column(name: 'resolvedDate', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resolvedDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'idUser', nullable: false)]
@@ -66,6 +73,31 @@ class Comment
 
         return $this;
     }
+
+    public function getCreatedDate(): ?\DateTimeInterface
+    {
+        return $this->createdDate;
+    }
+
+    public function setCreatedDate(\DateTimeInterface $createdDate): static
+    {
+        $this->createdDate = $createdDate;
+
+        return $this;
+    }
+
+    public function getResolvedDate(): ?\DateTimeInterface
+    {
+        return $this->resolvedDate;
+    }
+
+    public function setResolvedDate(\DateTimeInterface $resolvedDate): static
+    {
+        $this->resolvedDate = $resolvedDate;
+
+        return $this;
+    }
+
 
     public function getUser(): ?User
     {

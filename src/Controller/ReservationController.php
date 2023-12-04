@@ -244,7 +244,7 @@ class ReservationController extends AbstractController
             INNER JOIN books b ON r.idBook = b.idBook
             INNER JOIN borrows bo on b.idBook = bo.idBook
             WHERE r.idUser = $idUser
-            ORDER BY r.idReservation";
+            ORDER BY $order";
 
         $reservationsData = $connexion->fetchAllAssociative($query);
 
@@ -253,6 +253,7 @@ class ReservationController extends AbstractController
             $reservation = [
                 "idReservation" => $row["idReservation"],
                 "reservationDate" => $row["reservationDate"],
+                "isActive" => $row["isActive"]
             ];
 
             $user = [
