@@ -22,12 +22,13 @@ class CommentController extends AbstractController
     //--------------------------------
     // Route to get all the comments
     //--------------------------------
-    #[Route('/comments')]
-    public function getAll(Connection $connexion): JsonResponse
+    #[Route('/comments/{order}')]
+    public function getAll($order, Connection $connexion): JsonResponse
     {
         $commentsData = $connexion->fetchAllAssociative("
         SELECT * FROM comment c
         INNER JOIN users u ON c.idUser = u.idUser
+        ORDER BY createdDate $order
         ");
 
         $comments = [];
@@ -36,7 +37,91 @@ class CommentController extends AbstractController
                 "idComment" => $row["idComment"],
                 "reason" => $row["reason"],
                 "content" => $row["content"],
-                "isFixed" => $row["isFixed"]
+                "isFixed" => $row["isFixed"],
+                "createdDate" => $row["createdDate"],
+                "resolvedDate" => $row["resolvedDate"]
+            ];
+
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "email" => $row["email"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+                "phoneNumber" => $row["phoneNumber"],
+            ];
+
+            $comment["user"] = $user;
+            $comments[] = $comment;
+        }
+
+        return $this->json($comments);
+    }
+
+    //--------------------------------
+    // Route to get all the resolved comments
+    //--------------------------------
+    #[Route('/comments-resolved/{order}')]
+    public function getAllResolved($order, Connection $connexion): JsonResponse
+    {
+        $commentsData = $connexion->fetchAllAssociative("
+        SELECT * FROM comment c
+        INNER JOIN users u ON c.idUser = u.idUser
+        WHERE isFixed = 1
+        ORDER BY createdDate $order
+        ");
+
+        $comments = [];
+        foreach ($commentsData as $row) {
+            $comment = [
+                "idComment" => $row["idComment"],
+                "reason" => $row["reason"],
+                "content" => $row["content"],
+                "isFixed" => $row["isFixed"],
+                "createdDate" => $row["createdDate"],
+                "resolvedDate" => $row["resolvedDate"]
+            ];
+
+            $user = [
+                "idUser" => $row["idUser"],
+                "memberNumber" => $row["memberNumber"],
+                "email" => $row["email"],
+                "firstName" => $row["firstName"],
+                "lastName" => $row["lastName"],
+                "roles" => $row["roles"],
+                "phoneNumber" => $row["phoneNumber"],
+            ];
+
+            $comment["user"] = $user;
+            $comments[] = $comment;
+        }
+
+        return $this->json($comments);
+    }
+
+    //--------------------------------
+    // Route to get all the resolved comments
+    //--------------------------------
+    #[Route('/comments-not-resolved/{order}')]
+    public function getAllNotResolved($order, Connection $connexion): JsonResponse
+    {
+        $commentsData = $connexion->fetchAllAssociative("
+        SELECT * FROM comment c
+        INNER JOIN users u ON c.idUser = u.idUser
+        WHERE isFixed = 0
+        ORDER BY createdDate $order
+        ");
+
+        $comments = [];
+        foreach ($commentsData as $row) {
+            $comment = [
+                "idComment" => $row["idComment"],
+                "reason" => $row["reason"],
+                "content" => $row["content"],
+                "isFixed" => $row["isFixed"],
+                "createdDate" => $row["createdDate"],
+                "resolvedDate" => $row["resolvedDate"]
             ];
 
             $user = [
@@ -86,6 +171,7 @@ class CommentController extends AbstractController
     public function commentFixed($idComment, Request $req, Connection $connexion, ManagerRegistry $doctrine): JsonResponse
     {
         $comment = $connexion->executeStatement("UPDATE comment SET isFixed = 1 WHERE idComment = $idComment");
+        $comment = $connexion->executeStatement("UPDATE comment SET resolvedDate = NOW() WHERE idComment = $idComment");
 
         return $this->json($comment);
     }
@@ -93,6 +179,7 @@ class CommentController extends AbstractController
     function setComment($req, $comment) {
         $comment->setReason($req->request->get('reason'));
         $comment->setContent($req->request->get('content'));
+        $comment->setCreatedDate(new \DateTime());
         
         
         $idUser = $req->request->get('idUser');

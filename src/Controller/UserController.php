@@ -115,7 +115,8 @@ class UserController extends AbstractController
 				break;
 
 			case 'updatePassword':
-				$connexion->executeStatement("UPDATE users SET password = $request->request->get('newPassword') WHERE idUser = $idUser");
+				$password = strval($request->request->get('newPassword'));
+				$connexion->executeStatement("UPDATE users SET password = \"$password\" WHERE idUser = $idUser");
 				break;
 
 			case 'activateAccount':
