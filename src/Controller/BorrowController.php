@@ -364,7 +364,7 @@ class BorrowController extends AbstractController
         $borrow->setBook($book);
 
         $borrow->setBorrowedDate(new \DateTime());
-        $borrow->setDueDate(new \DateTime('+2 week'));
+        $borrow->setDueDate(new \DateTime('+1 month'));
 
         return $borrow;
     }

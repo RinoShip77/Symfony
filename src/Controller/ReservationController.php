@@ -184,11 +184,11 @@ class ReservationController extends AbstractController
     #[Route('/reservations/{idUser}')]
     public function getAllFromUser($idUser, Connection $connexion): JsonResponse
     {
-        $query = "SELECT *
+        $query = "SELECT r.*, u.*, b.*, bo.idBorrow, bo.borrowedDate, bo.dueDate, bo.returnedDate
             FROM reservations r 
             INNER JOIN users u ON r.idUser = u.idUser 
             INNER JOIN books b ON r.idBook = b.idBook
-            INNER JOIN borrows bo on b.idBook = bo.idBook
+            LEFT JOIN borrows bo on b.idBook = bo.idBook
             WHERE r.idUser = $idUser";
 
         $reservationsData = $connexion->fetchAllAssociative($query);
@@ -238,11 +238,11 @@ class ReservationController extends AbstractController
     #[Route('/reservations/{idUser}/{order}')]
     public function getReservationsOrderedBy($idUser, $order, Connection $connexion): JsonResponse
     {
-        $query = "SELECT *
+        $query = "SELECT r.*, u.*, b.*, bo.idBorrow, bo.borrowedDate, bo.dueDate, bo.returnedDate
             FROM reservations r 
             INNER JOIN users u ON r.idUser = u.idUser 
             INNER JOIN books b ON r.idBook = b.idBook
-            INNER JOIN borrows bo on b.idBook = bo.idBook
+            LEFT JOIN borrows bo on b.idBook = bo.idBook
             WHERE r.idUser = $idUser
             ORDER BY $order";
 
