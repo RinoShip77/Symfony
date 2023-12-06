@@ -28,6 +28,9 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 
+
+
+
 class RecommandationController extends AbstractController
 {
     private $em = null;
@@ -54,7 +57,7 @@ class RecommandationController extends AbstractController
         $this->amountGenres = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idGenre) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $this->amountAuthors = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM borrows b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         $this->amountGenresFavorites = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idGenre) FROM favorites b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
-        $this->amountAuthors = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM favorites b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
+        $this->amountAuthorsFaorites = $connexion->fetchAssociative("SELECT COUNT(DISTINCT idAuthor) FROM favorites b INNER JOIN books g ON b.idBook = g.idBook WHERE idUser = $idUser");
         
         
         $recommandedGenres = $this->RecommandedGenres();
@@ -201,14 +204,14 @@ class RecommandationController extends AbstractController
         if($this->favorites){
             foreach($this->genres as $genre){
                 $counter=0;
-                foreach($this->borrows as $borrow){
+                foreach($this->favorites as $borrow){
                     if($genre->getIdGenre() == $borrow->getBook()->getGenre()->getIdGenre()){     
                         $counter++;
                     }
                 }
                 //var_dump($counter);
                 //var_dump((sizeof($this->borrows)/sizeof($this->amountGenres)));
-                if($counter>=(sizeof($this->borrows)/$this->amountGenresFavorites['COUNT(DISTINCT idGenre)'])){
+                if($counter>=(sizeof($this->favorites)/$this->amountGenresFavorites['COUNT(DISTINCT idGenre)'])){
                     $recommandedGenres[] = $genre;
                 }
             }
@@ -223,12 +226,12 @@ class RecommandationController extends AbstractController
         if($this->favorites){
             foreach($this->authors as $author){
                 $counter=0;
-                foreach($this->borrows as $borrow){
+                foreach($this->favorites as $borrow){
                     if($author->getIdAuthor() == $borrow->getBook()->getAuthor()->getIdAuthor()){     
                         $counter++;
                     }
                 }
-                if($counter>=(sizeof($this->borrows)/$this->amountAuthorsFavorites['COUNT(DISTINCT idAuthor)'])){
+                if($counter>=(sizeof($this->favorites)/$this->amountAuthorsFavorites['COUNT(DISTINCT idAuthor)'])){
                     $recommandedAuthors[] = $authors;
                 }
             }
